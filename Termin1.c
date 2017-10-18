@@ -1,4 +1,4 @@
-// Lösung zu Termin1
+// L?sung zu Termin1
 // Aufgabe 1
 // Namen: ___________; ____________
 // Matr.: ___________; ____________
@@ -24,7 +24,7 @@ return 0;
 
 }
 */
-int blinEnable(unsigned int* port,unsigned int* output,unsigned int* set,unsigned int* clear);
+int enable(unsigned int* port,unsigned int* output,unsigned int* set,unsigned int* clear);
 void audiBlink(unsigned int* port,unsigned int* output,unsigned int* set,unsigned int* clear);
 
 
@@ -43,7 +43,7 @@ while (1)
 }
 
 
-int blinkEnable (unsigned int* port, unsigned int* output, unsigned int* set, unsigned int* clear){
+int enable (unsigned int* port, unsigned int* output, unsigned int* set, unsigned int* clear){
 	
 	*port = 0xff00;
 	*output = 0xff00;
