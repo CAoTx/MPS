@@ -11,7 +11,17 @@
 void interrupt (void) __attribute__ ((interrupt));
 
 void interrupt (void)
-{}
+{
+    StructPIO* piobaseB = PIOB_BASE;	// Basisadresse PIOB
+    StructAIC* aicbase = AIC_BASE;        //Basisadresse AIC - advanced interrupt controller
+    
+    if (~piobaseB->PIO_PDSR & KEY1)
+        piobaseB->PIO_CODR = LED2;
+    if (~piobaseB->PIO_PDSR & KEY2)
+        piobaseB->PIO_SODR = LED2;
+    
+  //  aicbase->AIC_EOICR = piobaseB->PIO_ISR;     //Reset des /EndofInterruptCommandRegister/ mittels schreiben   -   Reset des /InterruptStatusRegister/ durch lesen 
+}
 
 int main (){
     
@@ -21,31 +31,34 @@ int main (){
     
     pmcbase->PMC_PCER = 1 << PIOB_ID;  //0x4000, enable piob  - header aic.h
     
-    piobaseB->PIO_PER = LED1 | LED2 | LED3 | LED4 | LED5 | LED6 | LED7 | LED8 | KEY1 | KEY2 ;
-    piobaseB->PIO_OER = LED1 | LED2 | LED3 | LED4 | LED5 | LED6 | LED7 | LED8 ;
+    aicbase->AIC_IDCR = 1 << 14;          //Interrupt f?r PIOB ausschalten
+    aicbase->AIC_ICCR = 1 << 14;          //Interrupt f?r PIOB l?schen
+    aicbase->AIC_SVR[14]= (unsigned int)interrupt;
+    aicbase->AIC_SMR[PIOB_ID] = 0x7; // Priorit?t	
+    aicbase->AIC_IECR = 1 <<14;           // Interrrupt f?r PIOB aktivieren
+    
+    piobaseB->PIO_PER = LED1 | LED2 | KEY1 | KEY2 ;
+    piobaseB->PIO_OER = LED1 | LED2;
     piobaseB->PIO_ODR = KEY1 | KEY2 ;
     piobaseB->PIO_IER = KEY1 | KEY2 ;
     
+    piobaseB->PIO_SODR = LED1 | LED2;
     
+    
+
+    
+    while(1)
+    {
+    	    if(~piobaseB->PIO_PDSR & KEY1) {             
+	    piobaseB->PIO_CODR = LED1;     
+	    }        
+	    if(~piobaseB->PIO_PDSR & KEY2 ){
+	    piobaseB->PIO_SODR = LED1;            
+	    }
+    }
     
     return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
