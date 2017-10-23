@@ -9,6 +9,8 @@
 #include "../h/aic.h"
 #include "../h/tc.h"
 
+
+
 void interrupt (void) __attribute__ ((interrupt));
 void timedInterrupt(void) __attribute__((interrupt));
 
@@ -17,7 +19,7 @@ void interrupt (void)
     StructPIO* piobaseB = PIOB_BASE;	// Basisadresse PIOB
     StructAIC* aicbase = AIC_BASE;        //Basisadresse AIC - advanced interrupt controller
     
-     aicbase->AIC_EOICR = piobaseB->PIO_ISR; //Zurücksetzen des Interrupts
+     aicbase->AIC_EOICR = piobaseB->PIO_ISR; //Zur?cksetzen des Interrupts
     
     if (~piobaseB->PIO_PDSR & KEY1)
         piobaseB->PIO_CODR = LED2;
@@ -92,15 +94,27 @@ int main (){
     
     Timer3_init();
 
+    int rechencounter = (25000000 / 5) / 5;
     
     while(1)
     {
-    	    if(~piobaseB->PIO_PDSR & KEY1) {             
-	    piobaseB->PIO_CODR = LED1;     
-	    }        
-	    if(~piobaseB->PIO_PDSR & KEY2 ){
-	    piobaseB->PIO_SODR = LED1;            
+    	    //if(~piobaseB->PIO_PDSR & KEY1) {             
+	    //piobaseB->PIO_CODR = LED1;     
+	    //}        
+	    //if(~piobaseB->PIO_PDSR & KEY2 ){
+	    //piobaseB->PIO_SODR = LED1;            
+	    //}
+	    int i = 0;
+	    while( i < rechencounter){
+	    i = i+1;
 	    }
+	    piobaseB->PIO_CODR = LED1;
+	    i = 0;
+	    while( i < rechencounter){
+	    i = i+1;
+	    }
+	    piobaseB->PIO_SODR = LED1;
+
     }
     
     return 0;
