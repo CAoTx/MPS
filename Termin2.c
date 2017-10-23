@@ -9,17 +9,17 @@
 #include "../h/aic.h"
 #include "../h/tc.h"
 
-/* INTERRUPTS*/
-
+/* Functions */
 void    interrupt (void) __attribute__ ((interrupt));
-void    timedInterrupt(void) __attribute__((interrupt));
-void    Timer3_init( void );
+void    Timer_init( void );
 int     enable (unsigned int* port, unsigned int* output, unsigned int* set, unsigned int* clear);
 void    audiBlink (unsigned int* port, unsigned int* output, unsigned int* set, unsigned int* clear);
 int    blink0_5();
 int    blink1();
 
+/* Globals */
 int blinkStatus = 0;
+
 
 int main (){
     
@@ -33,32 +33,32 @@ int main (){
     StructPIO* piobaseB = PIOB_BASE;	// Basisadresse PIOB
     StructAIC* aicbase = AIC_BASE;        //Basisadresse AIC - advanced interrupt controller
     
-    pmcbase->PMC_PCER = 1 << PIOB_ID;  //0x4000, enable piob  - header aic.h
+    /* PMC */
+    pmcbase->PMC_PCER = 1 << PIOB_ID;   //0x4000, enable piob  - header aic.h
+    pmcbase->PMC_PCER = 1 << TC0_ID;    //enable TC0 clock                              ----------------------
     
-    aicbase->AIC_IDCR = 1 << 14;          //Interrupt f?r PIOB ausschalten
-    aicbase->AIC_ICCR = 1 << 14;          //Interrupt f?r PIOB l?schen
-    aicbase->AIC_SVR[14]= (unsigned int)interrupt;
-    aicbase->AIC_SVR[9] = (unsigned int)timedInterrupt;
+    /* AIC */
+    aicbase->AIC_IDCR = 1 << PIOB_ID;          //Interrupt f?r PIOB ausschalten
+    aicbase->AIC_ICCR = 1 << PIOB_ID;          //Interrupt f?r PIOB l?schen
+    aicbase->AIC_SVR[PIOB_ID]= (unsigned int)interrupt;
+    //aicbase->AIC_SVR[9] = (unsigned int)timedInterrupt;
 
-    aicbase->AIC_SMR[PIOB_ID] = 0x7; // Priorit?t	
-    aicbase->AIC_IECR = 1 <<14;           // Interrrupt f?r PIOB aktivieren
+    aicbase->AIC_SMR[PIOB_ID] = 0x7;    // Priorit?t	
+    aicbase->AIC_IECR = 1 << PIOB_ID;         // Interrrupt f?r PIOB aktivieren
     
+    /* PIOB */
     piobaseB->PIO_PER = ALL_LEDS ;
     piobaseB->PIO_OER = ALL_LEDS ;
     piobaseB->PIO_ODR = KEY1 | KEY2 | KEY3;
     piobaseB->PIO_IER = KEY1 | KEY2 | KEY3;
-    
-    piobaseB->PIO_SODR = ALL_LEDS;
-    
+    piobaseB->PIO_SODR = ALL_LEDS;    
     
     
+
     
-    
-    
-    
-    while(1)
+    /*while(1)
     audiBlink(PIOB_PER, PIOB_OER, PIOB_SOER, PIOB_COER);
-    
+   */ 
     
   //  Timer3_init();
    
@@ -66,6 +66,8 @@ int main (){
     return 0;
 }
 
+
+/* Interrupts */
 void interrupt (void)
 {
     StructPIO* piobaseB = PIOB_BASE;	// Basisadresse PIOB
@@ -83,21 +85,8 @@ void interrupt (void)
   //  aicbase->AIC_EOICR = piobaseB->PIO_ISR;     //Reset des /EndofInterruptCommandRegister/ mittels schreiben   -   Reset des /InterruptStatusRegister/ durch lesen 
 }
 
-void timedInterrupt(void){
 
-	StructPIO* piobaseB   = PIOB_BASE;
-	StructAIC* aicbase = AIC_BASE;
-	
-    if(~piobaseB->PIO_PDSR & LED3)
-        piobaseB->PIO_CODR = LED3;
-    else if(piobaseB->PIO_PDSR & (~LED3))
-        piobaseB->PIO_SODR = LED3;
-	
-	aicbase->AIC_EOICR = piobaseB->PIO_ISR; 
-
-}
-
-void Timer3_init( void )
+void Timer_init( void )
 {
   StructTC* timerbase3  = TCB3_BASE;		// Basisadressse TC Block 1
   StructPIO* piobaseA   = PIOA_BASE;		// Basisadresse PIO B
@@ -121,24 +110,21 @@ void Timer3_init( void )
 
 /* NORMAL FUNCTIONS */
 int enable (unsigned int* port, unsigned int* output, unsigned int* set, unsigned int* clear){
-	
+
 	*port = 0xff00;
 	*output = 0xff00;
-
 	return 1;
 }
 
 void audiBlink (unsigned int* port, unsigned int* output, unsigned int* set, unsigned int* clear){
 
-	enable(port, output, set, clear);
+	if (enable(port, output, set, clear) != 1)
+            return;
 		
-	
-        
 	//Actual turn off
 	*set = 0xff00;
 			
 	if (blinkStatus == 0){
-	//Actual turn on;
         blink1();
 	*clear = 0x800;
 	*clear = 0x1000;
