@@ -56,9 +56,9 @@ int main (){
     
 
     
-    /*while(1)
+    while(1)
     audiBlink(PIOB_PER, PIOB_OER, PIOB_SOER, PIOB_COER);
-   */ 
+   
     
   //  Timer3_init();
    

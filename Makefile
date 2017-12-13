@@ -1,6 +1,6 @@
  
 # Quelldatei
-FILE = Termin2
+FILE = TimerLearn
 # Toolchain
 TOOLCHAIN = arm-elf-
 # Compiler

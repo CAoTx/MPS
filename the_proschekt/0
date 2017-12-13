@@ -1,0 +1,1109 @@
+	.file	"main.c"
+	.global	CPU_CLOCK
+	.data
+	.align	2
+	.type	CPU_CLOCK, %object
+	.size	CPU_CLOCK, 4
+CPU_CLOCK:
+	.word	25000000
+	.global	fuellmenge
+	.align	2
+	.type	fuellmenge, %object
+	.size	fuellmenge, 4
+fuellmenge:
+	.word	100
+	.global	becher
+	.align	2
+	.type	becher, %object
+	.size	becher, 4
+becher:
+	.word	5
+	.global	FREQUENZ
+	.align	2
+	.type	FREQUENZ, %object
+	.size	FREQUENZ, 4
+FREQUENZ:
+	.word	50
+	.global	VORTEILER_INT
+	.align	2
+	.type	VORTEILER_INT, %object
+	.size	VORTEILER_INT, 4
+VORTEILER_INT:
+	.word	8
+	.global	C1
+	.align	2
+	.type	C1, %object
+	.size	C1, 4
+C1:
+	.word	2000
+	.global	C2
+	.bss
+	.align	2
+	.type	C2, %object
+	.size	C2, 4
+C2:
+	.space	4
+	.text
+	.align	2
+	.global	init_ser
+	.type	init_ser, %function
+init_ser:
+	@ args = 0, pretend = 0, frame = 12
+	@ frame_needed = 1, uses_anonymous_args = 0
+	@ link register save eliminated.
+	str	fp, [sp, #-4]!
+	add	fp, sp, #0
+	sub	sp, sp, #12
+	mov	r3, #-1342177280
+	mov	r3, r3, asr #14
+	str	r3, [fp, #-12]
+	mov	r3, #-1610612736
+	mov	r3, r3, asr #15
+	str	r3, [fp, #-8]
+	mov	r3, #-2147483648
+	mov	r3, r3, asr #13
+	str	r3, [fp, #-4]
+	ldr	r3, [fp, #-8]
+	mov	r2, #4
+	str	r2, [r3, #16]
+	ldr	r3, [fp, #-12]
+	mov	r2, #98304
+	str	r2, [r3, #4]
+	ldr	r3, [fp, #-4]
+	mov	r2, #160
+	str	r2, [r3, #0]
+	ldr	r3, [fp, #-4]
+	mov	r2, #41
+	str	r2, [r3, #32]
+	ldr	r3, [fp, #-4]
+	mov	r2, #2240
+	str	r2, [r3, #4]
+	ldr	r3, [fp, #-4]
+	mov	r2, #80
+	str	r2, [r3, #0]
+	mov	r3, #0
+	mov	r0, r3
+	add	sp, fp, #0
+	ldmfd	sp!, {fp}
+	bx	lr
+	.size	init_ser, .-init_ser
+	.align	2
+	.global	putch
+	.type	putch, %function
+putch:
+	@ args = 0, pretend = 0, frame = 8
+	@ frame_needed = 1, uses_anonymous_args = 0
+	@ link register save eliminated.
+	str	fp, [sp, #-4]!
+	add	fp, sp, #0
+	sub	sp, sp, #8
+	mov	r3, r0
+	strb	r3, [fp, #-8]
+	mov	r3, #-2147483648
+	mov	r3, r3, asr #13
+	str	r3, [fp, #-4]
+	ldr	r3, [fp, #-4]
+	ldr	r3, [r3, #20]
+	and	r3, r3, #2
+	cmp	r3, #0
+	beq	.L4
+	ldrb	r2, [fp, #-8]	@ zero_extendqisi2
+	ldr	r3, [fp, #-4]
+	str	r2, [r3, #28]
+	b	.L5
+.L4:
+	mov	r3, #0
+	strb	r3, [fp, #-8]
+.L5:
+	ldrb	r3, [fp, #-8]	@ zero_extendqisi2
+	mov	r0, r3
+	add	sp, fp, #0
+	ldmfd	sp!, {fp}
+	bx	lr
+	.size	putch, .-putch
+	.align	2
+	.global	getch
+	.type	getch, %function
+getch:
+	@ args = 0, pretend = 0, frame = 8
+	@ frame_needed = 1, uses_anonymous_args = 0
+	@ link register save eliminated.
+	str	fp, [sp, #-4]!
+	add	fp, sp, #0
+	sub	sp, sp, #8
+	mov	r3, #-2147483648
+	mov	r3, r3, asr #13
+	str	r3, [fp, #-8]
+	ldr	r3, [fp, #-8]
+	ldr	r3, [r3, #20]
+	and	r3, r3, #1
+	and	r3, r3, #255
+	cmp	r3, #0
+	beq	.L8
+	ldr	r3, [fp, #-8]
+	ldr	r3, [r3, #24]
+	strb	r3, [fp, #-1]
+	b	.L9
+.L8:
+	mov	r3, #0
+	strb	r3, [fp, #-1]
+.L9:
+	ldrb	r3, [fp, #-1]	@ zero_extendqisi2
+	mov	r0, r3
+	add	sp, fp, #0
+	ldmfd	sp!, {fp}
+	bx	lr
+	.size	getch, .-getch
+	.comm	Masse,4,4
+	.comm	str,12,4
+	.global	warteAufBecher
+	.data
+	.align	2
+	.type	warteAufBecher, %object
+	.size	warteAufBecher, 4
+warteAufBecher:
+	.word	1
+	.section	.rodata
+	.align	2
+.LC0:
+	.ascii	"Nutzer hat abgebrochen\000"
+	.align	2
+.LC1:
+	.ascii	"pumpen gestartet\000"
+	.align	2
+.LC2:
+	.ascii	"pumpen pausiert\000"
+	.align	2
+.LC3:
+	.ascii	"Becher entfernt\000"
+	.align	2
+.LC4:
+	.ascii	"Ende erreicht\000"
+	.text
+	.align	2
+	.global	main
+	.type	main, %function
+main:
+	@ args = 0, pretend = 0, frame = 16
+	@ frame_needed = 1, uses_anonymous_args = 0
+	stmfd	sp!, {fp, lr}
+	add	fp, sp, #4
+	sub	sp, sp, #16
+	mov	r3, #-1342177280
+	mov	r3, r3, asr #14
+	str	r3, [fp, #-16]
+	bl	init_ser
+	bl	Timer3_init
+	bl	PIO_Init
+.L19:
+	ldr	r3, .L21
+	mov	r2, #1
+	str	r2, [r3, #0]
+	bl	becherInit
+	mov	r3, r0
+	str	r3, [fp, #-12]
+	bl	MessungderMasse
+	mov	r2, r0
+	ldr	r3, .L21+4
+	str	r2, [r3, #0]
+	ldr	r3, .L21+4
+	ldr	r3, [r3, #0]
+	str	r3, [fp, #-20]
+	b	.L12
+.L18:
+	bl	MessungderMasse
+	mov	r2, r0
+	ldr	r3, .L21+4
+	str	r2, [r3, #0]
+	bl	getch
+	mov	r3, r0
+	strb	r3, [fp, #-5]
+	ldrb	r3, [fp, #-5]	@ zero_extendqisi2
+	cmp	r3, #115
+	bne	.L13
+	ldr	r0, .L21+8
+	bl	putStr
+	ldr	r3, .L21+4
+	mov	r2, #0
+	str	r2, [r3, #0]
+	b	.L14
+.L13:
+	ldrb	r3, [fp, #-5]	@ zero_extendqisi2
+	cmp	r3, #114
+	bne	.L15
+	ldr	r0, .L21+12
+	bl	putStr
+	ldr	r3, [fp, #-16]
+	mov	r2, #2
+	str	r2, [r3, #4]
+	b	.L14
+.L15:
+	ldrb	r3, [fp, #-5]	@ zero_extendqisi2
+	cmp	r3, #112
+	bne	.L14
+	ldr	r0, .L21+16
+	bl	putStr
+	ldr	r3, [fp, #-16]
+	mov	r2, #2
+	str	r2, [r3, #0]
+.L14:
+	ldr	r3, [fp, #-20]
+	sub	r2, r3, #5
+	ldr	r3, .L21+4
+	ldr	r3, [r3, #0]
+	cmp	r2, r3
+	ble	.L16
+	ldr	r0, .L21+20
+	bl	putStr
+	b	.L12
+.L16:
+	ldr	r2, [fp, #-20]
+	ldr	r3, .L21+4
+	ldr	r3, [r3, #0]
+	cmp	r2, r3
+	beq	.L12
+.L17:
+	ldr	r3, .L21+4
+	ldr	r3, [r3, #0]
+	str	r3, [fp, #-20]
+	ldr	r3, .L21+4
+	ldr	r3, [r3, #0]
+	ldr	r0, .L21+24
+	mov	r1, r3
+	bl	intToStr
+	ldr	r0, .L21+24
+	bl	putStr
+.L12:
+	ldr	r3, .L21+4
+	ldr	r2, [r3, #0]
+	ldr	r3, [fp, #-12]
+	rsb	r3, r3, r2
+	mov	r2, r3
+	ldr	r3, .L21+28
+	ldr	r3, [r3, #0]
+	cmp	r2, r3
+	bls	.L18
+	ldr	r0, .L21+32
+	bl	putStr
+	ldr	r3, [fp, #-16]
+	mov	r2, #2
+	str	r2, [r3, #0]
+	b	.L19
+.L22:
+	.align	2
+.L21:
+	.word	warteAufBecher
+	.word	Masse
+	.word	.LC0
+	.word	.LC1
+	.word	.LC2
+	.word	.LC3
+	.word	str
+	.word	fuellmenge
+	.word	.LC4
+	.size	main, .-main
+	.section	.rodata
+	.align	2
+.LC5:
+	.ascii	"Bitte Becher aufstellen. Mit Taste 1 bestaetigen\000"
+	.align	2
+.LC6:
+	.ascii	"Becher gewicht:\000"
+	.text
+	.align	2
+	.global	becherInit
+	.type	becherInit, %function
+becherInit:
+	@ args = 0, pretend = 0, frame = 20
+	@ frame_needed = 1, uses_anonymous_args = 0
+	stmfd	sp!, {fp, lr}
+	add	fp, sp, #4
+	sub	sp, sp, #20
+	mov	r3, #-2147483648
+	mov	r3, r3, asr #15
+	str	r3, [fp, #-12]
+	ldr	r0, .L32
+	bl	putStr
+.L24:
+	mov	r0, #10
+	bl	putch
+	mov	r3, r0
+	cmp	r3, #0
+	beq	.L24
+.L25:
+	mov	r0, #13
+	bl	putch
+	mov	r3, r0
+	cmp	r3, #0
+	beq	.L25
+	mov	r3, #0
+	str	r3, [fp, #-8]
+	b	.L26
+.L28:
+	bl	getch
+	mov	r3, r0
+	cmp	r3, #98
+	bne	.L26
+	bl	MessungderMasse
+	mov	r2, r0
+	ldr	r3, .L32+4
+	str	r2, [r3, #0]
+	ldr	r3, .L32+4
+	ldr	r3, [r3, #0]
+	mov	r2, r3
+	ldr	r3, .L32+8
+	ldr	r3, [r3, #0]
+	cmp	r2, r3
+	bcc	.L26
+.L27:
+	ldr	r3, .L32+12
+	mov	r2, #0
+	str	r2, [r3, #0]
+.L26:
+	ldr	r3, .L32+12
+	ldr	r3, [r3, #0]
+	cmp	r3, #0
+	bne	.L28
+	ldr	r0, .L32+16
+	bl	putStr
+	bl	MessungderMasse
+	mov	r3, r0
+	str	r3, [fp, #-8]
+	sub	r3, fp, #24
+	mov	r0, r3
+	ldr	r1, [fp, #-8]
+	bl	intToStr
+	sub	r3, fp, #24
+	mov	r0, r3
+	bl	putStr
+.L29:
+	mov	r0, #10
+	bl	putch
+	mov	r3, r0
+	cmp	r3, #0
+	beq	.L29
+.L30:
+	mov	r0, #13
+	bl	putch
+	mov	r3, r0
+	cmp	r3, #0
+	beq	.L30
+	ldr	r3, [fp, #-8]
+	mov	r0, r3
+	sub	sp, fp, #4
+	ldmfd	sp!, {fp, pc}
+.L33:
+	.align	2
+.L32:
+	.word	.LC5
+	.word	Masse
+	.word	becher
+	.word	warteAufBecher
+	.word	.LC6
+	.size	becherInit, .-becherInit
+	.align	2
+	.global	intToStr
+	.type	intToStr, %function
+intToStr:
+	@ args = 0, pretend = 0, frame = 20
+	@ frame_needed = 1, uses_anonymous_args = 0
+	stmfd	sp!, {fp, lr}
+	add	fp, sp, #4
+	sub	sp, sp, #20
+	str	r0, [fp, #-20]
+	str	r1, [fp, #-24]
+	mov	r3, #0
+	str	r3, [fp, #-16]
+	mov	r3, #0
+	str	r3, [fp, #-12]
+	mov	r3, #0
+	str	r3, [fp, #-8]
+	ldr	r3, [fp, #-24]
+	cmp	r3, #0
+	bge	.L36
+	mov	r3, #1
+	str	r3, [fp, #-8]
+	ldr	r3, [fp, #-24]
+	rsb	r3, r3, #0
+	str	r3, [fp, #-24]
+	b	.L36
+.L37:
+	ldr	r2, [fp, #-24]
+	ldr	r3, .L40
+	smull	r1, r3, r2, r3
+	mov	r1, r3, asr #2
+	mov	r3, r2, asr #31
+	rsb	r1, r3, r1
+	mov	r3, r1
+	mov	r3, r3, asl #2
+	add	r3, r3, r1
+	mov	r3, r3, asl #1
+	rsb	r3, r3, r2
+	str	r3, [fp, #-16]
+	ldr	r3, [fp, #-24]
+	ldr	r2, .L40
+	smull	r1, r2, r3, r2
+	mov	r2, r2, asr #2
+	mov	r3, r3, asr #31
+	rsb	r3, r3, r2
+	str	r3, [fp, #-24]
+	ldr	r3, [fp, #-12]
+	ldr	r2, [fp, #-20]
+	add	r3, r2, r3
+	ldr	r2, [fp, #-16]
+	and	r2, r2, #255
+	add	r2, r2, #48
+	and	r2, r2, #255
+	strb	r2, [r3, #0]
+	ldr	r3, [fp, #-12]
+	add	r3, r3, #1
+	str	r3, [fp, #-12]
+.L36:
+	ldr	r3, [fp, #-24]
+	cmp	r3, #0
+	bne	.L37
+	ldr	r3, [fp, #-8]
+	cmp	r3, #0
+	beq	.L38
+	ldr	r3, [fp, #-12]
+	ldr	r2, [fp, #-20]
+	add	r3, r2, r3
+	mov	r2, #45
+	strb	r2, [r3, #0]
+	ldr	r3, [fp, #-12]
+	add	r3, r3, #1
+	str	r3, [fp, #-12]
+.L38:
+	ldr	r3, [fp, #-12]
+	ldr	r2, [fp, #-20]
+	add	r3, r2, r3
+	mov	r2, #0
+	strb	r2, [r3, #0]
+	ldr	r0, [fp, #-20]
+	bl	reverseString
+	sub	sp, fp, #4
+	ldmfd	sp!, {fp, pc}
+.L41:
+	.align	2
+.L40:
+	.word	1717986919
+	.size	intToStr, .-intToStr
+	.align	2
+	.global	reverseString
+	.type	reverseString, %function
+reverseString:
+	@ args = 0, pretend = 0, frame = 16
+	@ frame_needed = 1, uses_anonymous_args = 0
+	@ link register save eliminated.
+	str	fp, [sp, #-4]!
+	add	fp, sp, #0
+	sub	sp, sp, #16
+	str	r0, [fp, #-16]
+	mov	r3, #0
+	strb	r3, [fp, #-9]
+	mov	r3, #0
+	str	r3, [fp, #-8]
+	mov	r3, #0
+	str	r3, [fp, #-4]
+	b	.L43
+.L44:
+	ldr	r3, [fp, #-4]
+	add	r3, r3, #1
+	str	r3, [fp, #-4]
+.L43:
+	ldr	r3, [fp, #-4]
+	ldr	r2, [fp, #-16]
+	add	r3, r2, r3
+	ldrb	r3, [r3, #0]	@ zero_extendqisi2
+	cmp	r3, #0
+	bne	.L44
+	ldr	r3, [fp, #-4]
+	sub	r3, r3, #1
+	str	r3, [fp, #-4]
+	b	.L45
+.L46:
+	ldr	r3, [fp, #-4]
+	ldr	r2, [fp, #-16]
+	add	r3, r2, r3
+	ldrb	r3, [r3, #0]
+	strb	r3, [fp, #-9]
+	ldr	r3, [fp, #-4]
+	ldr	r2, [fp, #-16]
+	add	r3, r2, r3
+	ldr	r2, [fp, #-8]
+	ldr	r1, [fp, #-16]
+	add	r2, r1, r2
+	ldrb	r2, [r2, #0]	@ zero_extendqisi2
+	strb	r2, [r3, #0]
+	ldr	r3, [fp, #-8]
+	ldr	r2, [fp, #-16]
+	add	r3, r2, r3
+	ldrb	r2, [fp, #-9]
+	strb	r2, [r3, #0]
+	ldr	r3, [fp, #-4]
+	sub	r3, r3, #1
+	str	r3, [fp, #-4]
+	ldr	r3, [fp, #-8]
+	add	r3, r3, #1
+	str	r3, [fp, #-8]
+.L45:
+	ldr	r2, [fp, #-8]
+	ldr	r3, [fp, #-4]
+	cmp	r2, r3
+	blt	.L46
+	add	sp, fp, #0
+	ldmfd	sp!, {fp}
+	bx	lr
+	.size	reverseString, .-reverseString
+	.global	__floatunsidf
+	.global	__muldf3
+	.global	__ltdf2
+	.align	2
+	.global	sleep
+	.type	sleep, %function
+sleep:
+	@ args = 0, pretend = 0, frame = 16
+	@ frame_needed = 1, uses_anonymous_args = 0
+	stmfd	sp!, {r4, r5, r6, r7, fp, lr}
+	add	fp, sp, #20
+	sub	sp, sp, #16
+	str	r0, [fp, #-36]
+	str	r1, [fp, #-32]
+	mov	r3, #0
+	str	r3, [fp, #-28]
+	mov	r3, #0
+	str	r3, [fp, #-24]
+	mov	r3, #0
+	str	r3, [fp, #-24]
+	b	.L49
+.L52:
+	ldr	r3, [fp, #-28]
+	add	r3, r3, #1
+	str	r3, [fp, #-28]
+	ldr	r3, [fp, #-24]
+	add	r3, r3, #1
+	str	r3, [fp, #-24]
+.L49:
+	ldr	r0, [fp, #-24]
+	bl	__floatunsidf
+	mov	r5, r0
+	mov	r6, r1
+	ldr	r3, .L54
+	ldr	r3, [r3, #0]
+	mov	r0, r3
+	bl	__floatunsidf
+	mov	r3, r0
+	mov	r4, r1
+	mov	r0, r3
+	mov	r1, r4
+	sub	r3, fp, #36
+	ldmia	r3, {r2-r3}
+	bl	__muldf3
+	mov	r3, r0
+	mov	r4, r1
+	mov	r2, #0
+	mov	r7, r2
+	mov	r0, r5
+	mov	r1, r6
+	mov	r2, r3
+	mov	r3, r4
+	bl	__ltdf2
+	mov	r3, r0
+	cmp	r3, #0
+	bge	.L50
+.L51:
+	mov	r3, #1
+	mov	r7, r3
+.L50:
+	and	r3, r7, #255
+	cmp	r3, #0
+	bne	.L52
+	sub	sp, fp, #20
+	ldmfd	sp!, {r4, r5, r6, r7, fp, pc}
+.L55:
+	.align	2
+.L54:
+	.word	CPU_CLOCK
+	.size	sleep, .-sleep
+	.align	2
+	.global	putStr
+	.type	putStr, %function
+putStr:
+	@ args = 0, pretend = 0, frame = 8
+	@ frame_needed = 1, uses_anonymous_args = 0
+	stmfd	sp!, {fp, lr}
+	add	fp, sp, #4
+	sub	sp, sp, #8
+	str	r0, [fp, #-12]
+.L57:
+	mov	r0, #10
+	bl	putch
+	mov	r3, r0
+	cmp	r3, #0
+	beq	.L57
+.L58:
+	mov	r0, #13
+	bl	putch
+	mov	r3, r0
+	cmp	r3, #0
+	beq	.L58
+	mov	r3, #0
+	str	r3, [fp, #-8]
+	b	.L59
+.L60:
+	ldr	r3, [fp, #-8]
+	ldr	r2, [fp, #-12]
+	add	r3, r2, r3
+	ldrb	r3, [r3, #0]	@ zero_extendqisi2
+	mov	r0, r3
+	bl	putch
+	mov	r3, r0
+	cmp	r3, #0
+	beq	.L60
+	ldr	r3, [fp, #-8]
+	add	r3, r3, #1
+	str	r3, [fp, #-8]
+.L59:
+	ldr	r3, [fp, #-8]
+	ldr	r2, [fp, #-12]
+	add	r3, r2, r3
+	ldrb	r3, [r3, #0]	@ zero_extendqisi2
+	cmp	r3, #0
+	bne	.L60
+	sub	sp, fp, #4
+	ldmfd	sp!, {fp, pc}
+	.size	putStr, .-putStr
+	.global	__udivsi3
+	.align	2
+	.global	Timer3_init
+	.type	Timer3_init, %function
+Timer3_init:
+	@ args = 0, pretend = 0, frame = 28
+	@ frame_needed = 1, uses_anonymous_args = 0
+	stmfd	sp!, {fp, lr}
+	add	fp, sp, #4
+	sub	sp, sp, #28
+	mvn	r3, #179200
+	sub	r3, r3, #956
+	sub	r3, r3, #3
+	str	r3, [fp, #-32]
+	mvn	r3, #179200
+	sub	r3, r3, #892
+	sub	r3, r3, #3
+	str	r3, [fp, #-28]
+	mov	r3, #-1610612736
+	mov	r3, r3, asr #15
+	str	r3, [fp, #-24]
+	ldr	r2, [fp, #-24]
+	mov	r3, #28416
+	add	r3, r3, #128
+	str	r3, [r2, #16]
+	ldr	r3, .L64
+	ldr	r3, [r3, #0]
+	str	r3, [fp, #-20]
+	ldr	r2, [fp, #-20]
+	ldr	r3, .L64+4
+	ldr	r3, [r3, #0]
+	mov	r0, r2
+	mov	r1, r3
+	bl	__udivsi3
+	mov	r3, r0
+	str	r3, [fp, #-20]
+	ldr	r2, [fp, #-20]
+	ldr	r3, .L64+8
+	ldr	r3, [r3, #0]
+	mov	r0, r2
+	mov	r1, r3
+	bl	__udivsi3
+	mov	r3, r0
+	str	r3, [fp, #-20]
+	ldr	r3, [fp, #-20]
+	str	r3, [fp, #-16]
+	ldr	r3, [fp, #-16]
+	mov	r2, r3, lsr #31
+	add	r3, r2, r3
+	mov	r3, r3, asr #1
+	str	r3, [fp, #-16]
+	mov	r3, #-1476395008
+	mov	r3, r3, asr #13
+	str	r3, [fp, #-12]
+	mov	r3, #-1342177280
+	mov	r3, r3, asr #14
+	str	r3, [fp, #-8]
+	ldr	r3, [fp, #-12]
+	mov	r2, #2
+	str	r2, [r3, #0]
+	ldr	r2, [fp, #-12]
+	mov	r3, #638976
+	add	r3, r3, #1
+	str	r3, [r2, #4]
+	ldr	r2, [fp, #-16]
+	ldr	r3, [fp, #-12]
+	str	r2, [r3, #20]
+	ldr	r2, [fp, #-20]
+	ldr	r3, [fp, #-12]
+	str	r2, [r3, #28]
+	ldr	r3, [fp, #-12]
+	mov	r2, #1
+	str	r2, [r3, #0]
+	ldr	r3, [fp, #-12]
+	mov	r2, #4
+	str	r2, [r3, #0]
+	ldr	r3, [fp, #-8]
+	mov	r2, #2
+	str	r2, [r3, #0]
+	ldr	r3, [fp, #-8]
+	mov	r2, #2
+	str	r2, [r3, #16]
+	ldr	r3, [fp, #-8]
+	mov	r2, #2
+	str	r2, [r3, #52]
+	ldr	r3, [fp, #-24]
+	mov	r2, #25088
+	str	r2, [r3, #16]
+	ldr	r3, [fp, #-8]
+	mov	r2, #144
+	str	r2, [r3, #4]
+	ldr	r3, [fp, #-32]
+	mov	r2, #2
+	str	r2, [r3, #0]
+	ldr	r2, [fp, #-32]
+	mov	r3, #327680
+	add	r3, r3, #64
+	str	r3, [r2, #4]
+	ldr	r3, [fp, #-32]
+	mov	r2, #1
+	str	r2, [r3, #0]
+	ldr	r3, [fp, #-28]
+	mov	r2, #2
+	str	r2, [r3, #0]
+	ldr	r2, [fp, #-28]
+	mov	r3, #327680
+	add	r3, r3, #64
+	str	r3, [r2, #4]
+	ldr	r3, [fp, #-28]
+	mov	r2, #1
+	str	r2, [r3, #0]
+	sub	sp, fp, #4
+	ldmfd	sp!, {fp, pc}
+.L65:
+	.align	2
+.L64:
+	.word	CPU_CLOCK
+	.word	VORTEILER_INT
+	.word	FREQUENZ
+	.size	Timer3_init, .-Timer3_init
+	.global	__floatsidf
+	.global	__divdf3
+	.global	__truncdfsf2
+	.global	__divsf3
+	.global	__subsf3
+	.global	__floatunsisf
+	.global	__mulsf3
+	.global	__fixunssfsi
+	.align	2
+	.global	MessungderMasse
+	.type	MessungderMasse, %function
+MessungderMasse:
+	@ args = 0, pretend = 0, frame = 56
+	@ frame_needed = 1, uses_anonymous_args = 0
+	stmfd	sp!, {r4, fp, lr}
+	add	fp, sp, #8
+	sub	sp, sp, #56
+	mvn	r3, #179200
+	sub	r3, r3, #956
+	sub	r3, r3, #3
+	str	r3, [fp, #-28]
+	mvn	r3, #179200
+	sub	r3, r3, #892
+	sub	r3, r3, #3
+	str	r3, [fp, #-24]
+	mov	r3, #-2147483648
+	mov	r3, r3, asr #19
+	str	r3, [fp, #-20]
+	ldr	r3, [fp, #-20]
+	mov	r2, #16384
+	str	r2, [r3, #292]
+	mov	r3, #0
+	str	r3, [fp, #-16]
+	ldr	r3, [fp, #-28]
+	ldr	r3, [r3, #32]
+	str	r3, [fp, #-64]
+	ldr	r3, [fp, #-24]
+	ldr	r3, [r3, #32]
+	str	r3, [fp, #-64]
+	ldr	r3, [fp, #-28]
+	mov	r2, #4
+	str	r2, [r3, #0]
+.L67:
+	ldr	r3, [fp, #-28]
+	ldr	r3, [r3, #32]
+	and	r3, r3, #64
+	cmp	r3, #0
+	beq	.L67
+	ldr	r3, [fp, #-28]
+	ldr	r3, [r3, #20]
+	str	r3, [fp, #-32]
+	ldr	r3, [fp, #-28]
+	ldr	r3, [r3, #24]
+	str	r3, [fp, #-36]
+	ldr	r3, [fp, #-24]
+	mov	r2, #4
+	str	r2, [r3, #0]
+.L68:
+	ldr	r3, [fp, #-24]
+	ldr	r3, [r3, #32]
+	and	r3, r3, #64
+	cmp	r3, #0
+	beq	.L68
+	ldr	r3, [fp, #-24]
+	ldr	r3, [r3, #20]
+	str	r3, [fp, #-40]
+	ldr	r3, [fp, #-24]
+	ldr	r3, [r3, #24]
+	str	r3, [fp, #-44]
+	ldr	r3, [fp, #-36]
+	eor	r2, r3, r3, asr #31
+	sub	r2, r2, r3, asr #31
+	ldr	r3, [fp, #-32]
+	cmp	r3, #0
+	rsblt	r3, r3, #0
+	rsb	r3, r3, r2
+	str	r3, [fp, #-48]
+	ldr	r3, [fp, #-48]
+	cmp	r3, #0
+	rsblt	r3, r3, #0
+	mov	r0, r3
+	bl	__floatsidf
+	mov	r3, r0
+	mov	r4, r1
+	mov	r0, r3
+	mov	r1, r4
+	mov	r2, #1073741824
+	add	r2, r2, #2686976
+	mov	r3, #0
+	bl	__divdf3
+	mov	r3, r0
+	mov	r4, r1
+	mov	r0, r3
+	mov	r1, r4
+	bl	__truncdfsf2
+	mov	r3, r0
+	str	r3, [fp, #-52]	@ float
+	ldr	r3, [fp, #-44]
+	eor	r2, r3, r3, asr #31
+	sub	r2, r2, r3, asr #31
+	ldr	r3, [fp, #-40]
+	cmp	r3, #0
+	rsblt	r3, r3, #0
+	rsb	r3, r3, r2
+	str	r3, [fp, #-56]
+	ldr	r3, [fp, #-56]
+	cmp	r3, #0
+	rsblt	r3, r3, #0
+	mov	r0, r3
+	bl	__floatsidf
+	mov	r3, r0
+	mov	r4, r1
+	mov	r0, r3
+	mov	r1, r4
+	mov	r2, #1073741824
+	add	r2, r2, #2686976
+	mov	r3, #0
+	bl	__divdf3
+	mov	r3, r0
+	mov	r4, r1
+	mov	r0, r3
+	mov	r1, r4
+	bl	__truncdfsf2
+	mov	r3, r0
+	str	r3, [fp, #-60]	@ float
+	ldr	r3, [fp, #-20]
+	mov	r2, #16384
+	str	r2, [r3, #288]
+	ldr	r3, .L70	@ float
+	str	r3, [fp, #-12]	@ float
+	ldr	r2, [fp, #-52]	@ float
+	ldr	r3, [fp, #-60]	@ float
+	mov	r0, r2
+	mov	r1, r3
+	bl	__divsf3
+	mov	r3, r0
+	str	r3, [fp, #-12]	@ float
+	ldr	r0, [fp, #-12]	@ float
+	ldr	r1, .L70+4	@ float
+	bl	__subsf3
+	mov	r3, r0
+	str	r3, [fp, #-12]	@ float
+	ldr	r3, .L70+8
+	ldr	r3, [r3, #0]
+	mov	r0, r3
+	bl	__floatunsisf
+	mov	r3, r0
+	ldr	r0, [fp, #-12]	@ float
+	mov	r1, r3
+	bl	__mulsf3
+	mov	r3, r0
+	str	r3, [fp, #-12]	@ float
+	ldr	r3, .L70+12
+	ldr	r3, [r3, #0]
+	mov	r0, r3
+	bl	__floatunsisf
+	mov	r3, r0
+	ldr	r0, [fp, #-12]	@ float
+	mov	r1, r3
+	bl	__subsf3
+	mov	r3, r0
+	mov	r0, r3
+	bl	__fixunssfsi
+	mov	r3, r0
+	str	r3, [fp, #-16]
+	ldr	r3, [fp, #-16]
+	mov	r0, r3
+	sub	sp, fp, #8
+	ldmfd	sp!, {r4, fp, pc}
+.L71:
+	.align	2
+.L70:
+	.word	0
+	.word	1065353216
+	.word	C1
+	.word	C2
+	.size	MessungderMasse, .-MessungderMasse
+	.align	2
+	.global	PIO_Init
+	.type	PIO_Init, %function
+PIO_Init:
+	@ args = 0, pretend = 0, frame = 24
+	@ frame_needed = 1, uses_anonymous_args = 0
+	@ link register save eliminated.
+	str	fp, [sp, #-4]!
+	add	fp, sp, #0
+	sub	sp, sp, #24
+	mov	r3, #-1342177280
+	mov	r3, r3, asr #14
+	str	r3, [fp, #-24]
+	mvn	r3, #179200
+	sub	r3, r3, #956
+	sub	r3, r3, #3
+	str	r3, [fp, #-20]
+	mvn	r3, #179200
+	sub	r3, r3, #892
+	sub	r3, r3, #3
+	str	r3, [fp, #-16]
+	mov	r3, #-2147483648
+	mov	r3, r3, asr #19
+	str	r3, [fp, #-12]
+	mov	r3, #-1610612736
+	mov	r3, r3, asr #15
+	str	r3, [fp, #-8]
+	mov	r3, #-2147483648
+	mov	r3, r3, asr #15
+	str	r3, [fp, #-4]
+	ldr	r2, [fp, #-8]
+	mov	r3, #28416
+	add	r3, r3, #128
+	str	r3, [r2, #16]
+	ldr	r3, [fp, #-12]
+	mov	r2, #16384
+	str	r2, [r3, #292]
+	ldr	r3, [fp, #-12]
+	mov	r2, #16384
+	str	r2, [r3, #296]
+	ldr	r2, .L74
+	ldr	r3, [fp, #-12]
+	str	r2, [r3, #184]
+	ldr	r3, [fp, #-12]
+	mov	r2, #16384
+	str	r2, [r3, #288]
+	ldr	r3, [fp, #-4]
+	mov	r2, #24
+	str	r2, [r3, #0]
+	ldr	r3, [fp, #-4]
+	mov	r2, #24
+	str	r2, [r3, #20]
+	ldr	r3, [fp, #-4]
+	mov	r2, #24
+	str	r2, [r3, #64]
+	ldr	r3, [fp, #-8]
+	mov	r2, #25088
+	str	r2, [r3, #16]
+	add	sp, fp, #0
+	ldmfd	sp!, {fp}
+	bx	lr
+.L75:
+	.align	2
+.L74:
+	.word	taste_irq_handler
+	.size	PIO_Init, .-PIO_Init
+	.align	2
+	.global	taste_irq_handler
+	.type	taste_irq_handler, %function
+taste_irq_handler:
+	@ Interrupt Service Routine.
+	@ args = 0, pretend = 0, frame = 12
+	@ frame_needed = 1, uses_anonymous_args = 0
+	@ link register save eliminated.
+	stmfd	sp!, {r2, r3, fp}
+	add	fp, sp, #8
+	sub	sp, sp, #12
+	mov	r3, #-2147483648
+	mov	r3, r3, asr #15
+	str	r3, [fp, #-20]
+	mov	r3, #-1342177280
+	mov	r3, r3, asr #14
+	str	r3, [fp, #-16]
+	mov	r3, #-2147483648
+	mov	r3, r3, asr #19
+	str	r3, [fp, #-12]
+	ldr	r3, [fp, #-20]
+	ldr	r3, [r3, #60]
+	mvn	r3, r3
+	and	r3, r3, #16
+	cmp	r3, #0
+	beq	.L77
+	ldr	r3, .L81
+	ldr	r3, [r3, #0]
+	cmp	r3, #0
+	bne	.L77
+	ldr	r3, [fp, #-16]
+	mov	r2, #2
+	str	r2, [r3, #4]
+.L77:
+	ldr	r3, [fp, #-20]
+	ldr	r3, [r3, #60]
+	mvn	r3, r3
+	and	r3, r3, #8
+	cmp	r3, #0
+	beq	.L78
+	ldr	r3, .L81+4
+	ldr	r3, [r3, #0]
+	mov	r2, r3
+	ldr	r3, .L81+8
+	ldr	r3, [r3, #0]
+	cmp	r2, r3
+	bls	.L79
+	ldr	r3, .L81
+	mov	r2, #0
+	str	r2, [r3, #0]
+	b	.L78
+.L79:
+	ldr	r3, .L81
+	mov	r2, #1
+	str	r2, [r3, #0]
+.L78:
+	ldr	r3, [fp, #-20]
+	ldr	r2, [r3, #76]
+	ldr	r3, [fp, #-12]
+	str	r2, [r3, #304]
+	sub	sp, fp, #8
+	ldmfd	sp!, {r2, r3, fp}
+	subs	pc, lr, #4
+.L82:
+	.align	2
+.L81:
+	.word	warteAufBecher
+	.word	Masse
+	.word	becher
+	.size	taste_irq_handler, .-taste_irq_handler
+	.ident	"GCC: (GNU) 4.4.1"
