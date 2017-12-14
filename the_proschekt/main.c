@@ -158,9 +158,9 @@ void itos(char str[], int x){
     int boolnegativ;
     int safeup = x;
     
-    if(n > 0)
+    if(n > 0){
         x = -1*x;
-        boolnegativ = 0;
+        boolnegativ = 0;}
     else boolnegativ = 1;
     
     //counting charactersize
