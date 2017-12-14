@@ -5,6 +5,8 @@
 #include "../h/pmc.h"
 #include "../h/aic.h"
 
+
+
 void sleep(double time);
 void putStr(char str[]);
 int MessungderMasse(void);
@@ -143,8 +145,71 @@ void intToStr(char str[], int n){
     str[i] = 0;
     
     reverseString(str);
-
 }
+
+
+
+
+void itos(char str[], int x){
+    
+    int numeral = x;
+    int boolnegativ;
+    
+    if(n > 0)
+        x = -1*x;
+        boolnegativ = 0;
+    else boolnegativ = 1;
+    
+    //counting charactersize
+    int size = 0;
+    while (n != 0){
+        ziffer = numeral % 10;
+        numeral = numeral / 10;
+        size++;
+    }
+    char arrstr[size];
+    
+    while (n != 0){
+        ziffer = x % 10;
+        x = x / 10;
+        size++;
+    }
+        
+    
+    
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 void reverseString(char str[]){
 	char tmp = 0;
