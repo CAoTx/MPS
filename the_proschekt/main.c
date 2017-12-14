@@ -158,7 +158,7 @@ void itos(char str[], int x){
     int boolnegativ;
     int safeup = x;
     
-    if(n > 0){
+    if(x > 0){
         x = -1*x;
         boolnegativ = 0;}
     else boolnegativ = 1;

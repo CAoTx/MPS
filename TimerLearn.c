@@ -1,8 +1,8 @@
  
-#include "../h/pmc.h"
-#include "../h/pio.h"
-#include "../h/aic.h"
-#include "../h/tc.h"
+#include "pmc.h"
+#include "pio.h"
+#include "aic.h"
+#include "tc.h"
 #include <stdio.h>
 
 //void    interrupt_piob (void) __attribute__ ((interrupt));
