@@ -7,6 +7,8 @@
 
 
 
+//tescht
+
 void sleep(double time);
 void putStr(char str[]);
 int MessungderMasse(void);
@@ -152,8 +154,9 @@ void intToStr(char str[], int n){
 
 void itos(char str[], int x){
     
-    int numeral = x;
+    int numeral;
     int boolnegativ;
+    int safeup = x;
     
     if(n > 0)
         x = -1*x;
@@ -162,19 +165,23 @@ void itos(char str[], int x){
     
     //counting charactersize
     int size = 0;
-    while (n != 0){
-        ziffer = numeral % 10;
-        numeral = numeral / 10;
-        size++;
-    }
-    char arrstr[size];
     
-    while (n != 0){
-        ziffer = x % 10;
+    while (x != 0){
+        numeral = x % 10;
         x = x / 10;
         size++;
     }
+    
+    char arrstr[size];
+    int i = 0;
+    
+    while (x != 0){
+        numeral = x % 10;
+        x = x / 10;
+        size++;
         
+    }
+    
     
     
 }
