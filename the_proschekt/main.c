@@ -155,38 +155,55 @@ void intToStr(char str[], int n){
 
 
 
-void itos(char str[], int x){
+void itos(char str[], int x) {
     
     int numeral;
     int boolnegativ;
     int safeup = x;
     
-    if(x > 0){
-        x = -1*x;
-        boolnegativ = 0;}
-    else boolnegativ = 1;
+    //check if negativ
+    if (x > 0) {
+        x = -1 * x;
+        boolnegativ = 0;
+    } else boolnegativ = 1;
     
     //counting charactersize
     int size = 0;
     
-    while (x != 0){
+    while (x != 0) {
         numeral = x % 10;
         x = x / 10;
         size++;
     }
-    
+    x = safeup;
+    //extract form int into array
     char arrstr[size];
     int i = 0;
     
-    while (x != 0){
+    while (i != size) {
         numeral = x % 10;
+        arrstr[i] = numeral + 48;
         x = x / 10;
-        size++;
-        
+        i++;
     }
     
+    //put array to string
+    size--;
+    i = 0;
     
-    
+    if (boolnegativ) {
+        i = 1;
+        str[0] = '-';
+    }
+    char test;
+    while (size > -1) {
+        test = arrstr[size];
+        // str[i] = arrstr[size];
+        str[i] = test;
+        i++;
+        size--;
+    }
+    //Works 15.12 12:33 on RA NEtbeans
 }
 
 
