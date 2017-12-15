@@ -6,7 +6,7 @@ unsigned int becher = 5; //Waagentoleranz in GRAMM
 unsigned int FREQUENZ = 50; //Frequenz welche die Pumpe ben??tigt in HERZ
 unsigned int VORTEILER_INT = 8;
 unsigned int C1 = 2000; //C1 der verwendeten Seitenwaage
-unsigned int  C2 = 0; //C2 der verwendeten Seitenwaage
+unsigned int C2 = 0; //C2 der verwendeten Seitenwaage
 
 #define VORTEILER TC_CLKS_MCK8
 
