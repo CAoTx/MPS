@@ -89,7 +89,7 @@ int becherInit(){
 
     StructPIO* piobaseB   	= PIOB_BASE;
 
-    putStr("Bitte Becher aufstellen. Mit Taste 1 bestaetigen");
+    putStr("Put on the cup - 5g at least");
     while(putch(0xa) == 0)
 	;
     while(putch(0xd) == 0)
@@ -107,7 +107,7 @@ int becherInit(){
 			warteAufBecher = 0;
 	}
 
-    putStr("Becher gewicht:");
+    putStr("cup weight:");
     
     m = MessungderMasse();
    
@@ -179,6 +179,7 @@ void itos(char str[], int x) {
     //Works 15.12 12:33 on RA NEtbeans
 }
 
+
 void sleep(double time){
     
     volatile unsigned int count = 0;        //volatile = nicht wegoptimieren 
@@ -201,7 +202,6 @@ void putStr(char str[]){
 	;
 	i++;
     }
-
 }
 
 void Timer3_init( void )
@@ -261,6 +261,20 @@ void Timer3_init( void )
 void timerPumpInit( void ){
     
     StructPMC* pmcbase = PMC_BASE;
+    StructPIO* piobaseA   = PIOA_BASE;	     
+    StructTC*  timerbase3  = TCB3_BASE;	     
+    
+    pmcbase->PMC_PCER = (1<<PIOA_ID)|(1<<TC3_ID);       //Enable clock for PIOA & TC3 
+    
+  
+    int tc3regC = CPU_CLOCK;
+    int tc3regA;
+    tc3regC = tc3regC / VORTEILER_INT;
+    tc3regC = tc3regC / FREQUENZ;
+    tc3regA = tc3regC;
+    tc3regA = tc3regA / 2;
+    
+    
     
 }
 
