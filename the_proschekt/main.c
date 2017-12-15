@@ -1,4 +1,4 @@
-//#include "defines.h"
+#include "defines.h"
 #include "seriell.c"
 #include "../h/pio.h"
 #include "../h/tc.h"
@@ -6,20 +6,6 @@
 #include "../h/aic.h"
 
 #include <stdlib.h>
-
-unsigned int CPU_CLOCK = 25000000; //CPU Takte pro sekunde
-
-unsigned int fuellmenge = 100; //F??llmenge in GRAMM
-unsigned int becher = 5; //Waagentoleranz in GRAMM
-
-unsigned int FREQUENZ = 50; //Frequenz welche die Pumpe ben??tigt in HERZ
-unsigned int PRESCALER_INT = 8;
-unsigned int C1 = 2000; //C1 der verwendeten Seitenwaage
-unsigned int C2 = 0; //C2 der verwendeten Seitenwaage
-
-#define PRESCALER TC_CLKS_MCK8
-
-#define TC_INIT  TC_CLKS_MCK2 | TC_LDBSTOP | TC_CAPT | TC_LDRA_RISING_EDGE | TC_LDRB_RISING_EDGE //Timerkonfiguration f??r das Messen der von der Waage generierten Signale.
 
 
 
@@ -229,7 +215,7 @@ void Timer3_init( void )
   pmcbase->PMC_PCER = 0x06f80;
 
   int TimerValueC = CPU_CLOCK;
-  TimerValueC = TimerValueC / PRESCALER_INT;
+  TimerValueC = TimerValueC / VORTEILER_INT;
   TimerValueC = TimerValueC / FREQUENZ;
   int TimerValueA = TimerValueC;
   TimerValueA = TimerValueA / 2;
@@ -245,10 +231,10 @@ void Timer3_init( void )
     TC_ACPA_SET_OUTPUT    |    //ACPA    : Register A set TIOA
     TC_WAVE               |    //WAVE    : Waveform mode
     TC_CPCTRG             |    //CPCTRG  : Register C compare trigger enable
-    PRESCALER;           //TCCLKS  : MCKI / 1024
+    VORTEILER;           //TCCLKS  : MCKI / 1024
 
   // Initialize the counter:
-  timerbase3->TC_RA = TimerValueA;	//Systemtakt / PRESCALER / Frequenz = RC. Bei Gleichm??igem high low, ist RA = RC/2. Hier z.b.: 25000000 / 8 / 50 = 62500
+  timerbase3->TC_RA = TimerValueA;	//Systemtakt / Vorteiler / Frequenz = RC. Bei Gleichm??igem high low, ist RA = RC/2. Hier z.b.: 25000000 / 8 / 50 = 62500
   timerbase3->TC_RC = TimerValueC;	//__
 
   // Start the timer :
@@ -272,13 +258,7 @@ void Timer3_init( void )
 	tcbase5->TC_CCR		=	TC_CLKEN;
 }
 
-
-
-
-
-//Timer 3 = PumpTimer
 void timerPumpInit( void ){
-    
     
     StructPMC* pmcbase = PMC_BASE;
     StructPIO* piobaseA   = PIOA_BASE;	     
@@ -289,31 +269,11 @@ void timerPumpInit( void ){
   
     int tc3regC = CPU_CLOCK;
     int tc3regA;
-    tc3regC = (tc3regC / PRESCALER_INT)/FREQUENZ;
-   // tc3regC = tc3regC / FREQUENZ;
-    tc3regA = tc3regC / 2;
-    //tc3regA = tc3regA / 2;
+    tc3regC = tc3regC / VORTEILER_INT;
+    tc3regC = tc3regC / FREQUENZ;
+    tc3regA = tc3regC;
+    tc3regA = tc3regA / 2;
     
-    
-    timerbase3->TC_CCR = TC_CLKDIS;    //Disable to initialize
-
-    timerbase3->TC_CMR =
-    TC_ACPC_CLEAR_OUTPUT  |    //ACPC    : Register C clear TIOA
-    TC_ACPA_SET_OUTPUT    |    //ACPA    : Register A set TIOA
-    TC_WAVE               |    //WAVE    : Waveform mode
-    TC_CPCTRG             |    //CPCTRG  : Register C compare trigger enable
-    PRESCALER;                 //TCCLKS  : MCKI / 1024
-    
-    // Initialize the counter:
-    timerbase3->TC_RA = tc3regA;    //Clock / perdif / frequenz / 2 = RA
-    timerbase3->TC_RC = tc3regC;    //Clock / perdif / frequenz /   = RC
-    
-    // Start the timer :
-    timerbase3->TC_CCR = TC_CLKEN ;    //__
-    timerbase3->TC_CCR = TC_SWTRG ;    //__
-    piobaseA->PIO_PER  = (1<<PIOTIOA3) ;    //__
-    piobaseA->PIO_OER  = (1<<PIOTIOA3) ;    //__
-    piobaseA->PIO_CODR = (1<<PIOTIOA3) ;    //__
     
     
 }
