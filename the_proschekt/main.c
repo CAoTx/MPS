@@ -24,6 +24,8 @@ unsigned int C2 = 0; //C2 der verwendeten Seitenwaage
 
 
 //tescht
+void timerPumpInit( void );
+void timerMeasureInit( void );
 
 void rest(double time);
 void putStr(char str[]);
@@ -32,6 +34,7 @@ void PIO_Init(void);
 //void taste_irq_handler (void) __attribute__ ((interrupt));
 void itos(char str[], int x);
 void Timer3_init(void);
+
 int becherInit(void);
 
 
@@ -214,77 +217,30 @@ void rest(double time){
 }
 
 
-void Timer3_init( void )
-{
 
-  
-  StructTC* tcbase4 = TCB4_BASE;
-  StructTC* tcbase5 = TCB5_BASE;
-
-  StructPMC* pmcbase = PMC_BASE;
-  pmcbase->PMC_PCER = 0x06f80;
-
-  int TimerValueC = CPU_CLOCK;
-  TimerValueC = TimerValueC / VORTEILER_INT;
-  TimerValueC = TimerValueC / FREQUENZ;
-  int TimerValueA = TimerValueC;
-  TimerValueA = TimerValueA / 2;
-	
-  StructTC* timerbase3  = TCB3_BASE;	// Basisadressse TC Block 1
-  StructPIO* piobaseA   = PIOA_BASE;	// Basisadresse PIO B
-
-	timerbase3->TC_CCR = TC_CLKDIS;	// Disable Clock
- 
-  // Initialize the mode of the timer 3
-  timerbase3->TC_CMR =
-    TC_ACPC_CLEAR_OUTPUT  |    //ACPC    : Register C clear TIOA
-    TC_ACPA_SET_OUTPUT    |    //ACPA    : Register A set TIOA
-    TC_WAVE               |    //WAVE    : Waveform mode
-    TC_CPCTRG             |    //CPCTRG  : Register C compare trigger enable
-    PRESCALER;           //TCCLKS  : MCKI / 1024
-
-  // Initialize the counter:
-  timerbase3->TC_RA = TimerValueA;	//Systemtakt / Vorteiler / Frequenz = RC. Bei Gleichm??igem high low, ist RA = RC/2. Hier z.b.: 25000000 / 8 / 50 = 62500
-  timerbase3->TC_RC = TimerValueC;	//__
-
-  // Start the timer :
-  timerbase3->TC_CCR = TC_CLKEN ;	//__
-  timerbase3->TC_CCR = TC_SWTRG ;	//__
-  piobaseA->PIO_PER  = (1<<PIOTIOA3) ;	//__
-  piobaseA->PIO_OER  = (1<<PIOTIOA3) ;	//__
-  piobaseA->PIO_CODR = (1<<PIOTIOA3) ;	//__
-  
-  //Initalisieren der Messtimer
-  
-	pmcbase->PMC_PCER	= (1<<9) | (1<<13) | (1<<14);
-    
-    piobaseA->PIO_PDR	=	0x090;		
-	tcbase4->TC_CCR		=	TC_CLKDIS;
-	tcbase4->TC_CMR		=	TCMEASURE_INIT;
-	tcbase4->TC_CCR		=	TC_CLKEN;
-	
-	tcbase5->TC_CCR		=	TC_CLKDIS;
-	tcbase5->TC_CMR		=	TCMEASURE_INIT;
-	tcbase5->TC_CCR		=	TC_CLKEN;
-}
 
 
 
 void timerPumpInit( void ){
     
+    StructPIO* piobaseA = PIOA_BASE;
     StructPMC* pmcbase = PMC_BASE;
     StructTC*  timerbase3  = TCB3_BASE;
     
+   
+    timerbase3->TC_CCR = TC_CLKDIS;    // Disable Clock to Configure
     
+   
+    //setup registers
     int tc3regC = CPU_CLOCK;
     int tc3regA;
     tc3regC = (tc3regC / VORTEILER_INT) / FREQUENZ;
     tc3regA = tc3regC / 2;
     
-     at91_reg safeup = pmcbase->PMC_PCSR;
-     timerbase3->TC_CCR = TC_CLKDIS;    // Disable Clock to Configure
+    timerbase3->TC_RA = tc3regA;
+    timerbase3->TC_RC = tc3regC;
     
-    // Initialize the mode of the timer 3
+    // Initialize mode
     timerbase3->TC_CMR =
     TC_ACPC_CLEAR_OUTPUT  |    //ACPC    : Register C clear TIOA
     TC_ACPA_SET_OUTPUT    |    //ACPA    : Register A set TIOA
@@ -292,13 +248,32 @@ void timerPumpInit( void ){
     TC_CPCTRG             |    //CPCTRG  : Register C compare trigger enable
     PRESCALER;                 //TCCLKS  : MCKI / 1024
     
-    safeup = pmcbase->PMC_PCSR;
-    pmcbase->PMC_PCER = safeup | (1<<TC3_ID);       //Enable clock for TC3
+    
+    //Start Timer
+    timerbase3->TC_CCR = TC_CLKEN | TC_SWTRG;
+    piobaseA->PIO_PER  = (1<<PIOTIOA3) ;
+    piobaseA->PIO_OER  = (1<<PIOTIOA3) ;
+    piobaseA->PIO_CODR = (1<<PIOTIOA3) ;
+
+    at91_reg safeup = pmcbase->PMC_PCSR;
+    pmcbase->PMC_PCER = safeup | (1<<TC3_ID);       //Enable clock
 }
 
-void timerPumpInit( void ){
+
+void timerMeasureInit( void ){
     
+    StructPIO* piobaseA = PIOA_BASE;
+    StructTC*  timerbase4  = TCB4_BASE;
+    StructTC*  timerbase5  = TCB5_BASE;
     
+    piobaseA->PIO_PDR         =    0x090;
+    timerbase4->TC_CCR        =    TC_CLKDIS;
+    timerbase4->TC_CMR        =    TCMEASURE_INIT;
+    timerbase4->TC_CCR        =    TC_CLKEN;
+    
+    timerbase5->TC_CCR        =    TC_CLKDIS;
+    timerbase5->TC_CMR        =    TCMEASURE_INIT;
+    timerbase5->TC_CCR        =    TC_CLKEN;
 }
 
 
@@ -445,4 +420,64 @@ void PIO_Init(void)
 //
 //    aicbase->AIC_EOICR = piobaseB->PIO_ISR;    //__
 //}
+
+
+/*konnte noch nicht getestet werden*/
+
+//void Timer3_init( void )
+//{
+//
+//
+//  StructTC* tcbase4 = TCB4_BASE;
+//  StructTC* tcbase5 = TCB5_BASE;
+//
+//  StructPMC* pmcbase = PMC_BASE;
+//  pmcbase->PMC_PCER = 0x06f80;
+//
+//  int TimerValueC = CPU_CLOCK;
+//  TimerValueC = TimerValueC / VORTEILER_INT;
+//  TimerValueC = TimerValueC / FREQUENZ;
+//  int TimerValueA = TimerValueC;
+//  TimerValueA = TimerValueA / 2;
+//
+//  StructTC* timerbase3  = TCB3_BASE;    // Basisadressse TC Block 1
+//  StructPIO* piobaseA   = PIOA_BASE;    // Basisadresse PIO B
+//
+//    timerbase3->TC_CCR = TC_CLKDIS;    // Disable Clock
+//
+//  // Initialize the mode of the timer 3
+//  timerbase3->TC_CMR =
+//    TC_ACPC_CLEAR_OUTPUT  |    //ACPC    : Register C clear TIOA
+//    TC_ACPA_SET_OUTPUT    |    //ACPA    : Register A set TIOA
+//    TC_WAVE               |    //WAVE    : Waveform mode
+//    TC_CPCTRG             |    //CPCTRG  : Register C compare trigger enable
+//    PRESCALER;           //TCCLKS  : MCKI / 1024
+//
+//  // Initialize the counter:
+//  timerbase3->TC_RA = TimerValueA;    //Systemtakt / Vorteiler / Frequenz = RC. Bei Gleichm??igem high low, ist RA = RC/2. Hier z.b.: 25000000 / 8 / 50 = 62500
+//  timerbase3->TC_RC = TimerValueC;    //__
+//
+//  // Start the timer :
+//  timerbase3->TC_CCR = TC_CLKEN ;    //__
+//  timerbase3->TC_CCR = TC_SWTRG ;    //__
+//  piobaseA->PIO_PER  = (1<<PIOTIOA3) ;    //__
+//  piobaseA->PIO_OER  = (1<<PIOTIOA3) ;    //__
+//  piobaseA->PIO_CODR = (1<<PIOTIOA3) ;    //__
+//
+//  //Initalisieren der Messtimer
+//
+//    pmcbase->PMC_PCER    = (1<<9) | (1<<13) | (1<<14);
+//
+//    piobaseA->PIO_PDR    =    0x090;
+//    tcbase4->TC_CCR        =    TC_CLKDIS;
+//    tcbase4->TC_CMR        =    TCMEASURE_INIT;
+//    tcbase4->TC_CCR        =    TC_CLKEN;
+//
+//    tcbase5->TC_CCR        =    TC_CLKDIS;
+//    tcbase5->TC_CMR        =    TCMEASURE_INIT;
+//    tcbase5->TC_CCR        =    TC_CLKEN;
+//}
+
+
+
 
