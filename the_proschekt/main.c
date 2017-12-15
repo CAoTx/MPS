@@ -5,6 +5,8 @@
 #include "../h/pmc.h"
 #include "../h/aic.h"
 
+#include <stdlib.h>
+
 
 
 //tescht
@@ -17,6 +19,7 @@ void taste_irq_handler (void) __attribute__ ((interrupt));
 void intToStr(char str[], int n);
 void reverseString(char str[]);
 void Timer3_init();
+int becherInit();
 
 
 volatile int Masse;
@@ -390,7 +393,7 @@ void PIO_Init(void)
 	
 	aicbase->AIC_IDCR = 1 << 14;          //Interrupt f?r PIOB ausschalten
     	aicbase->AIC_ICCR = 1 << 14;          //Interrupt f?r PIOB l?schen
-   	aicbase->AIC_SVR[14]= (unsigned int)taste_irq_handler;
+  	aicbase->AIC_SVR[14]= (unsigned int)taste_irq_handler;
 	
 	aicbase->AIC_IECR = 1 <<14;           // Interrrupt f?r PIOB aktivieren
     
@@ -401,6 +404,7 @@ void PIO_Init(void)
 	pmcbase->PMC_PCER	= (1<<9) | (1<<13) | (1<<14);
 
 }
+
 
 void taste_irq_handler (void)
 {
@@ -429,3 +433,4 @@ void taste_irq_handler (void)
 	
 	aicbase->AIC_EOICR = piobaseB->PIO_ISR;	//__
 }
+
