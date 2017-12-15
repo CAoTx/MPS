@@ -16,8 +16,7 @@ void putStr(char str[]);
 int MessungderMasse(void);
 void PIO_Init(void);
 void taste_irq_handler (void) __attribute__ ((interrupt));
-void intToStr(char str[], int n);
-void reverseString(char str[]);
+void itos(char str[], int x);
 void Timer3_init();
 int becherInit();
 
@@ -69,7 +68,7 @@ int main(){
 		;
 	else{
 		alteMasse = Masse;
-		intToStr(str, Masse);
+		itos(str, Masse);
 		putStr(str);
 	
 	}
@@ -112,7 +111,7 @@ int becherInit(){
     m = MessungderMasse();
    
     char char_Masse[12];
-    intToStr(char_Masse, m);
+    itos(char_Masse, m);
     
     putStr(char_Masse);
 
