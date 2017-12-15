@@ -8,13 +8,7 @@
 @ 
 @----------------------------------------------------------------------------*/
 
-#include "../h/pmc.h"
-#include "../h/pio.h"
-#include "../h/usart.h"
-
-int init_ser(void);
-char putch(char);
-char getch(void);
+#include "seriell.h"
 
 #define 	DEFAULT_BAUD 38400
 #define 	CLOCK_SPEED 25000000
@@ -39,10 +33,7 @@ int init_ser()
 	return 0;
 }
 
-// Gibt wenn möglich ein Zeichen auf die serielle Schnittstelle aus
-// und liefert das Zeichen wieder zurück
-// wenn eine Ausgabe nicht möglich war wird eine 0 zurück geliefert
-
+//Returns char if successfull else returns 0
 char putch(char Zeichen) 
 {
 	StructUSART* usartbase0 = USART0;	
@@ -58,7 +49,7 @@ char putch(char Zeichen)
 	return Zeichen;
 }
 
-// Gibt entweder ein empfangenes Zeichen oder eine 0 zurück
+ //Returns char if successfull else returns 0
 char getch(void) 
 {
 	StructUSART* usartbase0 = USART0;	
