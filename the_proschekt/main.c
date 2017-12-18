@@ -20,27 +20,34 @@ unsigned int C2 = 0; //C2 der verwendeten Seitenwaage
 
 #define PRESCALER TC_CLKS_MCK8
 
-#define TCMEASURE_INIT  TC_CLKS_MCK2 | TC_LDBSTOP | TC_CAPT | TC_LDRA_RISING_EDGE | TC_LDRB_RISING_EDGE //Timerkonfiguration f??r das Messen der von der Waage generierten Signale.
+#define TCMEASURE_INIT  TC_CLKS_MCK2 | TC_LDBSTOP | TC_CAPT | TC_LDRA_RISING_EDGE | TC_LDRB_RISING_EDGE //Timerconfig for weightmeasurement
 
 
-//tescht
+
+//INITS
 void timerPumpInit( void );
 void timerMeasureInit( void );
-
-void rest(double time);
-void putStr(char str[]);
-int MessungderMasse(void);
 void PIO_Init(void);
+//HELPfuncs
+void rest(double time);
+void endl();
+void putStr(char str[]);
+
+int massMeasure(void);
+
 //void taste_irq_handler (void) __attribute__ ((interrupt));
 void itos(char str[], int x);
 void Timer3_init(void);
 
 int becherInit(void);
 
-
 volatile int Masse;
 char str[12];
-int warteAufBecher = 1;
+int boolCupWaiting = 1;
+
+
+
+
 
 int main(){
     
@@ -55,16 +62,16 @@ int main(){
 
 	while(1){
 	
-	warteAufBecher = 1;
+	boolCupWaiting = 1;
 	
 
     
    	int becherMasse = becherInit();
-	Masse = MessungderMasse();
+	Masse = massMeasure();
 	volatile int alteMasse = Masse;
 		
 	while((Masse - becherMasse) <= fuellmenge){
-	Masse = MessungderMasse();
+	Masse = massMeasure();
         char input = getch();
 	if(input == 's'){
 		putStr("_PRESSED ABORD");
@@ -101,29 +108,33 @@ int main(){
     
 }
 
+void endl(){
+    while(putch(0xa) == 0)
+        ;
+    while(putch(0xd) == 0)
+        ;
+}
+
 int becherInit(){
 
     putStr("Put on the cup - 5g at least");
-    while(putch(0xa) == 0)
-	;
-    while(putch(0xd) == 0)
-	;
+    endl();
 
     
     int m = 0;
     
-    while(warteAufBecher)
+    while(boolCupWaiting)
     	if(getch()=='b'){
-		Masse = MessungderMasse();
+		Masse = massMeasure();
 		if(Masse < becher)
 			;
 		else
-			warteAufBecher = 0;
+			boolCupWaiting = 0;
 	}
 
     putStr("cup weight:");
     
-    m = MessungderMasse();
+    m = massMeasure();
    
     char char_Masse[12];
     itos(char_Masse, m);
@@ -139,12 +150,50 @@ int becherInit(){
 
 }
 
-void putStr(char str[]){
+int cupWaiting(){
+    
+    putStr("Put on the cup - 5g at least");
+    endl();
+    
+    
+    int m = 0;
+    
+    while(boolCupWaiting)
+        if(getch()=='b'){
+            Masse = massMeasure();
+            if(Masse < becher)
+                ;
+            else
+                boolCupWaiting = 0;
+        }
+    
+    putStr("cup weight:");
+    
+    m = massMeasure();
+    
+    char char_Masse[12];
+    itos(char_Masse, m);
+    
+    putStr(char_Masse);
     
     while(putch(0xa) == 0)
         ;
     while(putch(0xd) == 0)
         ;
+    
+    return m;
+    
+}
+
+
+
+
+
+
+
+void putStr(char str[]){
+    
+    endl();
     
     int i = 0;
     //rest(0.001);
@@ -204,7 +253,7 @@ void itos(char str[], int x) {
         i++;
         size--;
     }
-    //Works 15.12 12:33 on RA NEtbeans
+    //Works 15.12 12:33 on RA Netbeans
 }
 
 
@@ -287,24 +336,7 @@ void timerMeasureInit( void ){
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-int MessungderMasse(void){
+int massMeasure(void){
 
 
 	StructTC* tcbase4 = TCB4_BASE;
@@ -319,7 +351,7 @@ int MessungderMasse(void){
 	volatile int	captureRA2;
 	volatile int	captureRB2;
 	volatile int	capturediff1;
-	volatile float Periodendauer1;
+	volatile float period_length;
 	volatile int	capturediff2;
 	volatile float Periodendauer2;
 	unsigned int masse = 0;
@@ -344,7 +376,7 @@ int MessungderMasse(void){
         
         //wegen zeit und so 
         capturediff1	=	abs(captureRB1) - abs(captureRA1);
-	Periodendauer1 = abs(capturediff1) / 12.5;	// Zeit in us
+	period_length = abs(capturediff1) / 12.5;	// Zeit in us
 	capturediff2	= abs(captureRB2) - abs(captureRA2);
 	Periodendauer2 = abs(capturediff2) / 12.5;	// Zeit in us
 	
@@ -353,7 +385,7 @@ int MessungderMasse(void){
 	 aicbase->AIC_IECR = 1 << PIOB_ID;	     //pio darf interrupt werfen 
 	
 	float zw1 = 0;
-	zw1 = Periodendauer1 / Periodendauer2;
+	zw1 = period_length / Periodendauer2;
 	zw1 = zw1 - 1;
 	zw1 = zw1 * C1;
 	masse = zw1 - C2; //masse = (C1 * ((captureRA1 / captureRB1) - 1) - C2);
@@ -366,10 +398,6 @@ int MessungderMasse(void){
 
 void PIO_Init(void)
 {
-
-	StructPIO* piobaseA = PIOA_BASE;
-	StructTC* tcbase4 = TCB4_BASE;
-	StructTC* tcbase5 = TCB5_BASE;
 	StructAIC* aicbase = AIC_BASE;
 	StructPMC* pmcbase = PMC_BASE;	
 	StructPIO* piobaseB   	= PIOB_BASE;
@@ -378,18 +406,17 @@ void PIO_Init(void)
 	pmcbase->PMC_PCER = 0x06f80;
 
 	
-	aicbase->AIC_IDCR = 1 << 14;          //Interrupt f?r PIOB ausschalten
-    	aicbase->AIC_ICCR = 1 << 14;          //Interrupt f?r PIOB l?schen
-  	//aicbase->AIC_SVR[14]= (unsigned int)taste_irq_handler;
+	aicbase->AIC_IDCR = 1 << 14;          //Off Interrupt
+    	aicbase->AIC_ICCR = 1 << 14;          //Clear interrrupt register
+  	//aicbase->AIC_SVR[14]= (unsigned int)taste_irq_handler;    //set new interrupt function
 	
-	aicbase->AIC_IECR = 1 <<14;           // Interrrupt f?r PIOB aktivieren
+	aicbase->AIC_IECR = 1 <<14;           // On Interrupt
     
     	piobaseB->PIO_PER = KEY1 | KEY2;
     	piobaseB->PIO_ODR = KEY1 | KEY2;
     	piobaseB->PIO_IER = KEY1 | KEY2;
 	
 	pmcbase->PMC_PCER	= (1<<9) | (1<<13) | (1<<14);
-
 }
 
 
@@ -414,11 +441,7 @@ void PIO_Init(void)
 //    }
 //
 //    }
-//
-//
-//
-//
-//    aicbase->AIC_EOICR = piobaseB->PIO_ISR;    //__
+//    aicbase->AIC_EOICR = piobaseB->PIO_ISR;    //Reset Interrupt 4 Next
 //}
 
 
