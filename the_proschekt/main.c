@@ -37,7 +37,6 @@ int massMeasure(void);
 
 //void taste_irq_handler (void) __attribute__ ((interrupt));
 void itos(char str[], int x);
-void Timer3_init(void);
 
 int becherInit(void);
 
@@ -55,7 +54,9 @@ int main(){
     
 	init_ser();
 
-	Timer3_init();
+ 	timerPumpInit();
+	timerMeasureInit();
+	
 
 	PIO_Init();
 
@@ -141,10 +142,7 @@ int becherInit(){
     
     putStr(char_Masse);
 
-     while(putch(0xa) == 0)
-	;
-     while(putch(0xd) == 0)
-	;
+    endl();
     
     return m;
 
@@ -176,10 +174,7 @@ int cupWaiting(){
     
     putStr(char_Masse);
     
-    while(putch(0xa) == 0)
-        ;
-    while(putch(0xd) == 0)
-        ;
+   endl();
     
     return m;
     

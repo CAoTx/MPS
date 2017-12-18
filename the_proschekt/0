@@ -1,48 +1,4 @@
 	.file	"main.c"
-	.global	CPU_CLOCK
-	.data
-	.align	2
-	.type	CPU_CLOCK, %object
-	.size	CPU_CLOCK, 4
-CPU_CLOCK:
-	.word	25000000
-	.global	fuellmenge
-	.align	2
-	.type	fuellmenge, %object
-	.size	fuellmenge, 4
-fuellmenge:
-	.word	100
-	.global	becher
-	.align	2
-	.type	becher, %object
-	.size	becher, 4
-becher:
-	.word	5
-	.global	FREQUENZ
-	.align	2
-	.type	FREQUENZ, %object
-	.size	FREQUENZ, 4
-FREQUENZ:
-	.word	50
-	.global	VORTEILER_INT
-	.align	2
-	.type	VORTEILER_INT, %object
-	.size	VORTEILER_INT, 4
-VORTEILER_INT:
-	.word	8
-	.global	C1
-	.align	2
-	.type	C1, %object
-	.size	C1, 4
-C1:
-	.word	2000
-	.global	C2
-	.bss
-	.align	2
-	.type	C2, %object
-	.size	C2, 4
-C2:
-	.space	4
 	.text
 	.align	2
 	.global	init_ser
@@ -154,31 +110,75 @@ getch:
 	ldmfd	sp!, {fp}
 	bx	lr
 	.size	getch, .-getch
-	.comm	Masse,4,4
-	.comm	str,12,4
-	.global	warteAufBecher
+	.global	CPU_CLOCK
 	.data
 	.align	2
-	.type	warteAufBecher, %object
-	.size	warteAufBecher, 4
-warteAufBecher:
+	.type	CPU_CLOCK, %object
+	.size	CPU_CLOCK, 4
+CPU_CLOCK:
+	.word	25000000
+	.global	fuellmenge
+	.align	2
+	.type	fuellmenge, %object
+	.size	fuellmenge, 4
+fuellmenge:
+	.word	100
+	.global	becher
+	.align	2
+	.type	becher, %object
+	.size	becher, 4
+becher:
+	.word	5
+	.global	FREQUENZ
+	.align	2
+	.type	FREQUENZ, %object
+	.size	FREQUENZ, 4
+FREQUENZ:
+	.word	50
+	.global	VORTEILER_INT
+	.align	2
+	.type	VORTEILER_INT, %object
+	.size	VORTEILER_INT, 4
+VORTEILER_INT:
+	.word	8
+	.global	C1
+	.align	2
+	.type	C1, %object
+	.size	C1, 4
+C1:
+	.word	2000
+	.global	C2
+	.bss
+	.align	2
+	.type	C2, %object
+	.size	C2, 4
+C2:
+	.space	4
+	.comm	Masse,4,4
+	.comm	str,12,4
+	.global	boolCupWaiting
+	.data
+	.align	2
+	.type	boolCupWaiting, %object
+	.size	boolCupWaiting, 4
+boolCupWaiting:
 	.word	1
 	.section	.rodata
 	.align	2
 .LC0:
-	.ascii	"Nutzer hat abgebrochen\000"
+	.ascii	"_PRESSED ABORD\000"
 	.align	2
 .LC1:
-	.ascii	"pumpen gestartet\000"
+	.ascii	"_STARTED PUMP\000"
 	.align	2
 .LC2:
-	.ascii	"pumpen pausiert\000"
+	.ascii	"_STOPPED PUMP\000"
 	.align	2
 .LC3:
-	.ascii	"Becher entfernt\000"
+	.ascii	"_REMOVED CUP\000"
 	.align	2
 .LC4:
-	.ascii	"Ende erreicht\000"
+	.ascii	"_END_\000"
 	.text
 	.align	2
 	.global	main
@@ -193,27 +193,28 @@ main:
 	mov	r3, r3, asr #14
 	str	r3, [fp, #-16]
 	bl	init_ser
-	bl	Timer3_init
+	bl	timerPumpInit
+	bl	timerMeasureInit
 	bl	PIO_Init
-.L18:
-	ldr	r3, .L20
+.L19:
+	ldr	r3, .L21
 	mov	r2, #1
 	str	r2, [r3, #0]
 	bl	becherInit
 	mov	r3, r0
 	str	r3, [fp, #-12]
-	bl	MessungderMasse
+	bl	massMeasure
 	mov	r2, r0
-	ldr	r3, .L20+4
+	ldr	r3, .L21+4
 	str	r2, [r3, #0]
-	ldr	r3, .L20+4
+	ldr	r3, .L21+4
 	ldr	r3, [r3, #0]
 	str	r3, [fp, #-20]
 	b	.L12
-.L17:
-	bl	MessungderMasse
+.L18:
+	bl	massMeasure
 	mov	r2, r0
-	ldr	r3, .L20+4
+	ldr	r3, .L21+4
 	str	r2, [r3, #0]
 	bl	getch
 	mov	r3, r0
@@ -221,9 +222,9 @@ main:
 	ldrb	r3, [fp, #-5]	@ zero_extendqisi2
 	cmp	r3, #115
 	bne	.L13
-	ldr	r0, .L20+8
+	ldr	r0, .L21+8
 	bl	putStr
-	ldr	r3, .L20+4
+	ldr	r3, .L21+4
 	mov	r2, #0
 	str	r2, [r3, #0]
 	b	.L14
@@ -231,7 +232,7 @@ main:
 	ldrb	r3, [fp, #-5]	@ zero_extendqisi2
 	cmp	r3, #114
 	bne	.L15
-	ldr	r0, .L20+12
+	ldr	r0, .L21+12
 	bl	putStr
 	ldr	r3, [fp, #-16]
 	mov	r2, #2
@@ -241,7 +242,7 @@ main:
 	ldrb	r3, [fp, #-5]	@ zero_extendqisi2
 	cmp	r3, #112
 	bne	.L14
-	ldr	r0, .L20+16
+	ldr	r0, .L21+16
 	bl	putStr
 	ldr	r3, [fp, #-16]
 	mov	r2, #2
@@ -249,49 +250,50 @@ main:
 .L14:
 	ldr	r3, [fp, #-20]
 	sub	r2, r3, #5
-	ldr	r3, .L20+4
+	ldr	r3, .L21+4
 	ldr	r3, [r3, #0]
 	cmp	r2, r3
 	ble	.L16
-	ldr	r0, .L20+20
+	ldr	r0, .L21+20
 	bl	putStr
 	b	.L12
 .L16:
 	ldr	r2, [fp, #-20]
-	ldr	r3, .L20+4
+	ldr	r3, .L21+4
 	ldr	r3, [r3, #0]
 	cmp	r2, r3
 	beq	.L12
-	ldr	r3, .L20+4
+.L17:
+	ldr	r3, .L21+4
 	ldr	r3, [r3, #0]
 	str	r3, [fp, #-20]
-	ldr	r3, .L20+4
+	ldr	r3, .L21+4
 	ldr	r3, [r3, #0]
-	ldr	r0, .L20+24
+	ldr	r0, .L21+24
 	mov	r1, r3
-	bl	intToStr
-	ldr	r0, .L20+24
+	bl	itos
+	ldr	r0, .L21+24
 	bl	putStr
 .L12:
-	ldr	r3, .L20+4
+	ldr	r3, .L21+4
 	ldr	r2, [r3, #0]
 	ldr	r3, [fp, #-12]
 	rsb	r3, r3, r2
 	mov	r2, r3
-	ldr	r3, .L20+28
+	ldr	r3, .L21+28
 	ldr	r3, [r3, #0]
 	cmp	r2, r3
-	bls	.L17
-	ldr	r0, .L20+32
+	bls	.L18
+	ldr	r0, .L21+32
 	bl	putStr
 	ldr	r3, [fp, #-16]
 	mov	r2, #2
 	str	r2, [r3, #0]
-	b	.L18
-.L21:
+	b	.L19
+.L22:
 	.align	2
-.L20:
-	.word	warteAufBecher
+.L21:
+	.word	boolCupWaiting
 	.word	Masse
 	.word	.LC0
 	.word	.LC1
@@ -301,227 +303,263 @@ main:
 	.word	fuellmenge
 	.word	.LC4
 	.size	main, .-main
+	.align	2
+	.global	endl
+	.type	endl, %function
+endl:
+	@ args = 0, pretend = 0, frame = 0
+	@ frame_needed = 1, uses_anonymous_args = 0
+	stmfd	sp!, {fp, lr}
+	add	fp, sp, #4
+.L24:
+	mov	r0, #10
+	bl	putch
+	mov	r3, r0
+	cmp	r3, #0
+	beq	.L24
+.L25:
+	mov	r0, #13
+	bl	putch
+	mov	r3, r0
+	cmp	r3, #0
+	beq	.L25
+	ldmfd	sp!, {fp, pc}
+	.size	endl, .-endl
 	.section	.rodata
 	.align	2
 .LC5:
-	.ascii	"Bitte Becher aufstellen. Mit Taste 1 bestaetigen\000"
+	.ascii	"Put on the cup - 5g at least\000"
 	.align	2
 .LC6:
-	.ascii	"Becher gewicht:\000"
+	.ascii	"cup weight:\000"
 	.text
 	.align	2
 	.global	becherInit
 	.type	becherInit, %function
 becherInit:
-	@ args = 0, pretend = 0, frame = 20
+	@ args = 0, pretend = 0, frame = 16
 	@ frame_needed = 1, uses_anonymous_args = 0
 	stmfd	sp!, {fp, lr}
 	add	fp, sp, #4
-	sub	sp, sp, #20
-	mov	r3, #-2147483648
-	mov	r3, r3, asr #15
-	str	r3, [fp, #-12]
-	ldr	r0, .L30
+	sub	sp, sp, #16
+	ldr	r0, .L34
 	bl	putStr
-.L23:
-	mov	r0, #10
-	bl	putch
-	mov	r3, r0
-	cmp	r3, #0
-	beq	.L23
-.L24:
-	mov	r0, #13
-	bl	putch
-	mov	r3, r0
-	cmp	r3, #0
-	beq	.L24
+	bl	endl
 	mov	r3, #0
 	str	r3, [fp, #-8]
-	b	.L25
-.L26:
+	b	.L28
+.L30:
 	bl	getch
 	mov	r3, r0
 	cmp	r3, #98
-	bne	.L25
-	bl	MessungderMasse
+	bne	.L28
+	bl	massMeasure
 	mov	r2, r0
-	ldr	r3, .L30+4
+	ldr	r3, .L34+4
 	str	r2, [r3, #0]
-	ldr	r3, .L30+4
+	ldr	r3, .L34+4
 	ldr	r3, [r3, #0]
 	mov	r2, r3
-	ldr	r3, .L30+8
+	ldr	r3, .L34+8
 	ldr	r3, [r3, #0]
 	cmp	r2, r3
-	bcc	.L25
-	ldr	r3, .L30+12
+	bcc	.L28
+.L29:
+	ldr	r3, .L34+12
 	mov	r2, #0
 	str	r2, [r3, #0]
-.L25:
-	ldr	r3, .L30+12
+.L28:
+	ldr	r3, .L34+12
 	ldr	r3, [r3, #0]
 	cmp	r3, #0
-	bne	.L26
-	ldr	r0, .L30+16
+	bne	.L30
+	ldr	r0, .L34+16
 	bl	putStr
-	bl	MessungderMasse
+	bl	massMeasure
 	mov	r3, r0
 	str	r3, [fp, #-8]
-	sub	r3, fp, #24
+	sub	r3, fp, #20
 	mov	r0, r3
 	ldr	r1, [fp, #-8]
-	bl	intToStr
-	sub	r3, fp, #24
+	bl	itos
+	sub	r3, fp, #20
 	mov	r0, r3
 	bl	putStr
-.L27:
+.L31:
 	mov	r0, #10
 	bl	putch
 	mov	r3, r0
 	cmp	r3, #0
-	beq	.L27
-.L28:
+	beq	.L31
+.L32:
 	mov	r0, #13
 	bl	putch
 	mov	r3, r0
 	cmp	r3, #0
-	beq	.L28
+	beq	.L32
 	ldr	r3, [fp, #-8]
 	mov	r0, r3
 	sub	sp, fp, #4
 	ldmfd	sp!, {fp, pc}
-.L31:
+.L35:
 	.align	2
-.L30:
+.L34:
 	.word	.LC5
 	.word	Masse
 	.word	becher
-	.word	warteAufBecher
+	.word	boolCupWaiting
 	.word	.LC6
 	.size	becherInit, .-becherInit
 	.align	2
-	.global	intToStr
-	.type	intToStr, %function
-intToStr:
-	@ args = 0, pretend = 0, frame = 20
+	.global	cupWaiting
+	.type	cupWaiting, %function
+cupWaiting:
+	@ args = 0, pretend = 0, frame = 16
 	@ frame_needed = 1, uses_anonymous_args = 0
 	stmfd	sp!, {fp, lr}
 	add	fp, sp, #4
-	sub	sp, sp, #20
-	str	r0, [fp, #-20]
-	str	r1, [fp, #-24]
-	mov	r3, #0
-	str	r3, [fp, #-16]
-	mov	r3, #0
-	str	r3, [fp, #-12]
+	sub	sp, sp, #16
+	ldr	r0, .L43
+	bl	putStr
+	bl	endl
 	mov	r3, #0
 	str	r3, [fp, #-8]
-	ldr	r3, [fp, #-24]
-	cmp	r3, #0
-	bge	.L34
-	mov	r3, #1
-	str	r3, [fp, #-8]
-	ldr	r3, [fp, #-24]
-	rsb	r3, r3, #0
-	str	r3, [fp, #-24]
-	b	.L34
-.L35:
-	ldr	r2, [fp, #-24]
-	ldr	r1, .L38
-	smull	r0, r3, r1, r2
-	mov	r1, r3, asr #2
-	mov	r3, r2, asr #31
-	rsb	r1, r3, r1
-	mov	r3, r1
-	mov	r3, r3, asl #2
-	add	r3, r3, r1
-	mov	r3, r3, asl #1
-	rsb	r3, r3, r2
-	str	r3, [fp, #-16]
-	ldr	r3, [fp, #-24]
-	ldr	r1, .L38
-	smull	r0, r2, r1, r3
-	mov	r2, r2, asr #2
-	mov	r3, r3, asr #31
-	rsb	r3, r3, r2
-	str	r3, [fp, #-24]
-	ldr	r3, [fp, #-12]
-	ldr	r2, [fp, #-20]
-	add	r3, r2, r3
-	ldr	r2, [fp, #-16]
-	and	r2, r2, #255
-	add	r2, r2, #48
-	and	r2, r2, #255
-	strb	r2, [r3, #0]
-	ldr	r3, [fp, #-12]
-	add	r3, r3, #1
-	str	r3, [fp, #-12]
-.L34:
-	ldr	r3, [fp, #-24]
-	cmp	r3, #0
-	bne	.L35
-	ldr	r3, [fp, #-8]
-	cmp	r3, #0
-	beq	.L36
-	ldr	r3, [fp, #-12]
-	ldr	r2, [fp, #-20]
-	add	r3, r2, r3
-	mov	r2, #45
-	strb	r2, [r3, #0]
-	ldr	r3, [fp, #-12]
-	add	r3, r3, #1
-	str	r3, [fp, #-12]
-.L36:
-	ldr	r3, [fp, #-12]
-	ldr	r2, [fp, #-20]
-	add	r3, r2, r3
+	b	.L37
+.L39:
+	bl	getch
+	mov	r3, r0
+	cmp	r3, #98
+	bne	.L37
+	bl	massMeasure
+	mov	r2, r0
+	ldr	r3, .L43+4
+	str	r2, [r3, #0]
+	ldr	r3, .L43+4
+	ldr	r3, [r3, #0]
+	mov	r2, r3
+	ldr	r3, .L43+8
+	ldr	r3, [r3, #0]
+	cmp	r2, r3
+	bcc	.L37
+.L38:
+	ldr	r3, .L43+12
 	mov	r2, #0
-	strb	r2, [r3, #0]
-	ldr	r0, [fp, #-20]
-	bl	reverseString
+	str	r2, [r3, #0]
+.L37:
+	ldr	r3, .L43+12
+	ldr	r3, [r3, #0]
+	cmp	r3, #0
+	bne	.L39
+	ldr	r0, .L43+16
+	bl	putStr
+	bl	massMeasure
+	mov	r3, r0
+	str	r3, [fp, #-8]
+	sub	r3, fp, #20
+	mov	r0, r3
+	ldr	r1, [fp, #-8]
+	bl	itos
+	sub	r3, fp, #20
+	mov	r0, r3
+	bl	putStr
+.L40:
+	mov	r0, #10
+	bl	putch
+	mov	r3, r0
+	cmp	r3, #0
+	beq	.L40
+.L41:
+	mov	r0, #13
+	bl	putch
+	mov	r3, r0
+	cmp	r3, #0
+	beq	.L41
+	ldr	r3, [fp, #-8]
+	mov	r0, r3
 	sub	sp, fp, #4
 	ldmfd	sp!, {fp, pc}
-.L39:
+.L44:
 	.align	2
-.L38:
-	.word	1717986919
-	.size	intToStr, .-intToStr
+.L43:
+	.word	.LC5
+	.word	Masse
+	.word	becher
+	.word	boolCupWaiting
+	.word	.LC6
+	.size	cupWaiting, .-cupWaiting
+	.align	2
+	.global	putStr
+	.type	putStr, %function
+putStr:
+	@ args = 0, pretend = 0, frame = 8
+	@ frame_needed = 1, uses_anonymous_args = 0
+	stmfd	sp!, {fp, lr}
+	add	fp, sp, #4
+	sub	sp, sp, #8
+	str	r0, [fp, #-12]
+	bl	endl
+	mov	r3, #0
+	str	r3, [fp, #-8]
+	b	.L46
+.L47:
+	ldr	r3, [fp, #-8]
+	ldr	r2, [fp, #-12]
+	add	r3, r2, r3
+	ldrb	r3, [r3, #0]	@ zero_extendqisi2
+	mov	r0, r3
+	bl	putch
+	mov	r3, r0
+	cmp	r3, #0
+	beq	.L47
+	ldr	r3, [fp, #-8]
+	add	r3, r3, #1
+	str	r3, [fp, #-8]
+.L46:
+	ldr	r3, [fp, #-8]
+	ldr	r2, [fp, #-12]
+	add	r3, r2, r3
+	ldrb	r3, [r3, #0]	@ zero_extendqisi2
+	cmp	r3, #0
+	bne	.L47
+	sub	sp, fp, #4
+	ldmfd	sp!, {fp, pc}
+	.size	putStr, .-putStr
 	.align	2
 	.global	itos
 	.type	itos, %function
 itos:
-	@ args = 0, pretend = 0, frame = 36
+	@ args = 0, pretend = 0, frame = 40
 	@ frame_needed = 1, uses_anonymous_args = 0
 	@ link register save eliminated.
 	stmfd	sp!, {r4, r5, r6, r7, r8, fp}
 	add	fp, sp, #20
-	sub	sp, sp, #36
-	str	r0, [fp, #-52]
-	str	r1, [fp, #-56]
+	sub	sp, sp, #40
+	str	r0, [fp, #-56]
+	str	r1, [fp, #-60]
 	mov	r2, sp
 	mov	ip, r2
-	ldr	r2, [fp, #-56]
-	str	r2, [fp, #-32]
-	ldr	r2, [fp, #-56]
+	ldr	r2, [fp, #-60]
+	str	r2, [fp, #-36]
+	ldr	r2, [fp, #-60]
 	cmp	r2, #0
-	ble	.L41
-	ldr	r2, [fp, #-56]
+	ble	.L50
+	ldr	r2, [fp, #-60]
 	rsb	r2, r2, #0
-	str	r2, [fp, #-56]
+	str	r2, [fp, #-60]
 	mov	r2, #0
-	str	r2, [fp, #-36]
-	b	.L42
-.L41:
+	str	r2, [fp, #-40]
+	b	.L51
+.L50:
 	mov	r2, #1
-	str	r2, [fp, #-36]
-.L42:
+	str	r2, [fp, #-40]
+.L51:
 	mov	r2, #0
-	str	r2, [fp, #-28]
-	b	.L43
-.L44:
-	ldr	r1, [fp, #-56]
-	ldr	r0, .L48
-	smull	r7, r2, r0, r1
+	str	r2, [fp, #-32]
+	b	.L52
+.L53:
+	ldr	r1, [fp, #-60]
+	ldr	r2, .L60
+	smull	r0, r2, r1, r2
 	mov	r0, r2, asr #2
 	mov	r2, r1, asr #31
 	rsb	r0, r2, r0
@@ -530,24 +568,26 @@ itos:
 	add	r2, r2, r0
 	mov	r2, r2, asl #1
 	rsb	r2, r2, r1
-	str	r2, [fp, #-40]
-	ldr	r2, [fp, #-56]
-	ldr	r0, .L48
-	smull	r7, r1, r0, r2
+	str	r2, [fp, #-44]
+	ldr	r2, [fp, #-60]
+	ldr	r1, .L60
+	smull	r0, r1, r2, r1
 	mov	r1, r1, asr #2
 	mov	r2, r2, asr #31
 	rsb	r2, r2, r1
-	str	r2, [fp, #-56]
-	ldr	r2, [fp, #-28]
+	str	r2, [fp, #-60]
+	ldr	r2, [fp, #-32]
 	add	r2, r2, #1
-	str	r2, [fp, #-28]
-.L43:
-	ldr	r2, [fp, #-56]
+	str	r2, [fp, #-32]
+.L52:
+	ldr	r2, [fp, #-60]
 	cmp	r2, #0
-	bne	.L44
-	ldr	r0, [fp, #-28]
+	bne	.L53
+	ldr	r2, [fp, #-36]
+	str	r2, [fp, #-60]
+	ldr	r0, [fp, #-32]
 	sub	r2, r0, #1
-	str	r2, [fp, #-48]
+	str	r2, [fp, #-52]
 	mov	r2, r0
 	mov	r1, r2
 	mov	r2, #0
@@ -588,14 +628,14 @@ itos:
 	add	r3, r3, #3
 	mov	r3, r3, lsr #2
 	mov	r3, r3, asl #2
-	str	r3, [fp, #-44]
+	str	r3, [fp, #-48]
 	mov	r3, #0
-	str	r3, [fp, #-24]
-	b	.L45
-.L46:
-	ldr	r2, [fp, #-56]
-	ldr	r1, .L48
-	smull	r0, r3, r1, r2
+	str	r3, [fp, #-28]
+	b	.L54
+.L55:
+	ldr	r2, [fp, #-60]
+	ldr	r3, .L60
+	smull	r1, r3, r2, r3
 	mov	r1, r3, asr #2
 	mov	r3, r2, asr #31
 	rsb	r1, r3, r1
@@ -604,104 +644,79 @@ itos:
 	add	r3, r3, r1
 	mov	r3, r3, asl #1
 	rsb	r3, r3, r2
-	str	r3, [fp, #-40]
-	ldr	r3, [fp, #-56]
-	ldr	r1, .L48
-	smull	r7, r2, r1, r3
+	str	r3, [fp, #-44]
+	ldr	r3, [fp, #-28]
+	ldr	r2, [fp, #-44]
+	and	r2, r2, #255
+	add	r2, r2, #48
+	and	r1, r2, #255
+	ldr	r2, [fp, #-48]
+	strb	r1, [r2, r3]
+	ldr	r3, [fp, #-60]
+	ldr	r2, .L60
+	smull	r0, r2, r3, r2
 	mov	r2, r2, asr #2
 	mov	r3, r3, asr #31
 	rsb	r3, r3, r2
-	str	r3, [fp, #-56]
+	str	r3, [fp, #-60]
 	ldr	r3, [fp, #-28]
 	add	r3, r3, #1
 	str	r3, [fp, #-28]
-.L45:
-	ldr	r3, [fp, #-56]
+.L54:
+	ldr	r2, [fp, #-28]
+	ldr	r3, [fp, #-32]
+	cmp	r2, r3
+	bne	.L55
+	ldr	r3, [fp, #-32]
+	sub	r3, r3, #1
+	str	r3, [fp, #-32]
+	mov	r3, #0
+	str	r3, [fp, #-28]
+	ldr	r3, [fp, #-40]
 	cmp	r3, #0
-	bne	.L46
+	beq	.L57
+	mov	r3, #1
+	str	r3, [fp, #-28]
+	ldr	r3, [fp, #-56]
+	mov	r2, #45
+	strb	r2, [r3, #0]
+	b	.L57
+.L58:
+	ldr	r3, [fp, #-32]
+	ldr	r2, [fp, #-48]
+	ldrb	r3, [r2, r3]
+	strb	r3, [fp, #-21]
+	ldr	r3, [fp, #-28]
+	ldr	r2, [fp, #-56]
+	add	r3, r2, r3
+	ldrb	r2, [fp, #-21]
+	strb	r2, [r3, #0]
+	ldr	r3, [fp, #-28]
+	add	r3, r3, #1
+	str	r3, [fp, #-28]
+	ldr	r3, [fp, #-32]
+	sub	r3, r3, #1
+	str	r3, [fp, #-32]
+.L57:
+	ldr	r3, [fp, #-32]
+	cmp	r3, #0
+	bge	.L58
 	mov	sp, ip
 	sub	sp, fp, #20
 	ldmfd	sp!, {r4, r5, r6, r7, r8, fp}
 	bx	lr
-.L49:
+.L61:
 	.align	2
-.L48:
+.L60:
 	.word	1717986919
 	.size	itos, .-itos
-	.align	2
-	.global	reverseString
-	.type	reverseString, %function
-reverseString:
-	@ args = 0, pretend = 0, frame = 16
-	@ frame_needed = 1, uses_anonymous_args = 0
-	@ link register save eliminated.
-	str	fp, [sp, #-4]!
-	add	fp, sp, #0
-	sub	sp, sp, #16
-	str	r0, [fp, #-16]
-	mov	r3, #0
-	strb	r3, [fp, #-9]
-	mov	r3, #0
-	str	r3, [fp, #-8]
-	mov	r3, #0
-	str	r3, [fp, #-4]
-	b	.L51
-.L52:
-	ldr	r3, [fp, #-4]
-	add	r3, r3, #1
-	str	r3, [fp, #-4]
-.L51:
-	ldr	r3, [fp, #-4]
-	ldr	r2, [fp, #-16]
-	add	r3, r2, r3
-	ldrb	r3, [r3, #0]	@ zero_extendqisi2
-	cmp	r3, #0
-	bne	.L52
-	ldr	r3, [fp, #-4]
-	sub	r3, r3, #1
-	str	r3, [fp, #-4]
-	b	.L53
-.L54:
-	ldr	r3, [fp, #-4]
-	ldr	r2, [fp, #-16]
-	add	r3, r2, r3
-	ldrb	r3, [r3, #0]
-	strb	r3, [fp, #-9]
-	ldr	r3, [fp, #-4]
-	ldr	r2, [fp, #-16]
-	add	r3, r2, r3
-	ldr	r2, [fp, #-8]
-	ldr	r1, [fp, #-16]
-	add	r2, r1, r2
-	ldrb	r2, [r2, #0]	@ zero_extendqisi2
-	strb	r2, [r3, #0]
-	ldr	r3, [fp, #-8]
-	ldr	r2, [fp, #-16]
-	add	r3, r2, r3
-	ldrb	r2, [fp, #-9]
-	strb	r2, [r3, #0]
-	ldr	r3, [fp, #-4]
-	sub	r3, r3, #1
-	str	r3, [fp, #-4]
-	ldr	r3, [fp, #-8]
-	add	r3, r3, #1
-	str	r3, [fp, #-8]
-.L53:
-	ldr	r2, [fp, #-8]
-	ldr	r3, [fp, #-4]
-	cmp	r2, r3
-	blt	.L54
-	add	sp, fp, #0
-	ldmfd	sp!, {fp}
-	bx	lr
-	.size	reverseString, .-reverseString
 	.global	__floatunsidf
 	.global	__muldf3
 	.global	__ltdf2
 	.align	2
-	.global	sleep
-	.type	sleep, %function
-sleep:
+	.global	rest
+	.type	rest, %function
+rest:
 	@ args = 0, pretend = 0, frame = 16
 	@ frame_needed = 1, uses_anonymous_args = 0
 	stmfd	sp!, {r4, r5, r6, r7, fp, lr}
@@ -715,20 +730,20 @@ sleep:
 	str	r3, [fp, #-24]
 	mov	r3, #0
 	str	r3, [fp, #-24]
-	b	.L57
-.L60:
+	b	.L63
+.L66:
 	ldr	r3, [fp, #-28]
 	add	r3, r3, #1
 	str	r3, [fp, #-28]
 	ldr	r3, [fp, #-24]
 	add	r3, r3, #1
 	str	r3, [fp, #-24]
-.L57:
+.L63:
 	ldr	r0, [fp, #-24]
 	bl	__floatunsidf
 	mov	r5, r0
 	mov	r6, r1
-	ldr	r3, .L62
+	ldr	r3, .L68
 	ldr	r3, [r3, #0]
 	mov	r0, r3
 	bl	__floatunsidf
@@ -750,180 +765,95 @@ sleep:
 	bl	__ltdf2
 	mov	r3, r0
 	cmp	r3, #0
-	bge	.L58
-.L59:
+	bge	.L64
+.L65:
 	mov	r3, #1
 	mov	r7, r3
-.L58:
+.L64:
 	and	r3, r7, #255
 	cmp	r3, #0
-	bne	.L60
+	bne	.L66
 	sub	sp, fp, #20
 	ldmfd	sp!, {r4, r5, r6, r7, fp, pc}
-.L63:
+.L69:
 	.align	2
-.L62:
-	.word	CPU_CLOCK
-	.size	sleep, .-sleep
-	.align	2
-	.global	putStr
-	.type	putStr, %function
-putStr:
-	@ args = 0, pretend = 0, frame = 8
-	@ frame_needed = 1, uses_anonymous_args = 0
-	stmfd	sp!, {fp, lr}
-	add	fp, sp, #4
-	sub	sp, sp, #8
-	str	r0, [fp, #-12]
-.L65:
-	mov	r0, #10
-	bl	putch
-	mov	r3, r0
-	cmp	r3, #0
-	beq	.L65
-.L66:
-	mov	r0, #13
-	bl	putch
-	mov	r3, r0
-	cmp	r3, #0
-	beq	.L66
-	mov	r3, #0
-	str	r3, [fp, #-8]
-	b	.L67
 .L68:
-	ldr	r3, [fp, #-8]
-	ldr	r2, [fp, #-12]
-	add	r3, r2, r3
-	ldrb	r3, [r3, #0]	@ zero_extendqisi2
-	mov	r0, r3
-	bl	putch
-	mov	r3, r0
-	cmp	r3, #0
-	beq	.L68
-	ldr	r3, [fp, #-8]
-	add	r3, r3, #1
-	str	r3, [fp, #-8]
-.L67:
-	ldr	r3, [fp, #-8]
-	ldr	r2, [fp, #-12]
-	add	r3, r2, r3
-	ldrb	r3, [r3, #0]	@ zero_extendqisi2
-	cmp	r3, #0
-	bne	.L68
-	sub	sp, fp, #4
-	ldmfd	sp!, {fp, pc}
-	.size	putStr, .-putStr
+	.word	CPU_CLOCK
+	.size	rest, .-rest
 	.global	__udivsi3
 	.align	2
-	.global	Timer3_init
-	.type	Timer3_init, %function
-Timer3_init:
-	@ args = 0, pretend = 0, frame = 28
+	.global	timerPumpInit
+	.type	timerPumpInit, %function
+timerPumpInit:
+	@ args = 0, pretend = 0, frame = 24
 	@ frame_needed = 1, uses_anonymous_args = 0
 	stmfd	sp!, {fp, lr}
 	add	fp, sp, #4
-	sub	sp, sp, #28
-	mvn	r3, #179200
-	sub	r3, r3, #956
-	sub	r3, r3, #3
-	str	r3, [fp, #-32]
-	mvn	r3, #179200
-	sub	r3, r3, #892
-	sub	r3, r3, #3
-	str	r3, [fp, #-28]
+	sub	sp, sp, #24
+	mov	r3, #-1342177280
+	mov	r3, r3, asr #14
+	str	r3, [fp, #-24]
 	mov	r3, #-1610612736
 	mov	r3, r3, asr #15
-	str	r3, [fp, #-24]
-	ldr	r2, [fp, #-24]
-	mov	r3, #28416
-	add	r3, r3, #128
-	str	r3, [r2, #16]
+	str	r3, [fp, #-20]
+	mov	r3, #-1476395008
+	mov	r3, r3, asr #13
+	str	r3, [fp, #-16]
+	ldr	r3, [fp, #-16]
+	mov	r2, #2
+	str	r2, [r3, #0]
 	ldr	r3, .L72
 	ldr	r3, [r3, #0]
-	str	r3, [fp, #-20]
-	ldr	r2, [fp, #-20]
+	str	r3, [fp, #-12]
+	ldr	r2, [fp, #-12]
 	ldr	r3, .L72+4
 	ldr	r3, [r3, #0]
 	mov	r0, r2
 	mov	r1, r3
 	bl	__udivsi3
 	mov	r3, r0
-	str	r3, [fp, #-20]
-	ldr	r2, [fp, #-20]
+	mov	r2, r3
 	ldr	r3, .L72+8
 	ldr	r3, [r3, #0]
 	mov	r0, r2
 	mov	r1, r3
 	bl	__udivsi3
 	mov	r3, r0
-	str	r3, [fp, #-20]
-	ldr	r3, [fp, #-20]
-	str	r3, [fp, #-16]
-	ldr	r3, [fp, #-16]
+	str	r3, [fp, #-12]
+	ldr	r3, [fp, #-12]
 	mov	r2, r3, lsr #31
 	add	r3, r2, r3
 	mov	r3, r3, asr #1
-	str	r3, [fp, #-16]
-	mov	r3, #-1476395008
-	mov	r3, r3, asr #13
-	str	r3, [fp, #-12]
-	mov	r3, #-1342177280
-	mov	r3, r3, asr #14
 	str	r3, [fp, #-8]
-	ldr	r3, [fp, #-12]
-	mov	r2, #2
-	str	r2, [r3, #0]
+	ldr	r2, [fp, #-8]
+	ldr	r3, [fp, #-16]
+	str	r2, [r3, #20]
 	ldr	r2, [fp, #-12]
+	ldr	r3, [fp, #-16]
+	str	r2, [r3, #28]
+	ldr	r2, [fp, #-16]
 	mov	r3, #638976
 	add	r3, r3, #1
 	str	r3, [r2, #4]
-	ldr	r2, [fp, #-16]
-	ldr	r3, [fp, #-12]
-	str	r2, [r3, #20]
-	ldr	r2, [fp, #-20]
-	ldr	r3, [fp, #-12]
-	str	r2, [r3, #28]
-	ldr	r3, [fp, #-12]
-	mov	r2, #1
+	ldr	r3, [fp, #-16]
+	mov	r2, #5
 	str	r2, [r3, #0]
-	ldr	r3, [fp, #-12]
-	mov	r2, #4
-	str	r2, [r3, #0]
-	ldr	r3, [fp, #-8]
+	ldr	r3, [fp, #-24]
 	mov	r2, #2
 	str	r2, [r3, #0]
-	ldr	r3, [fp, #-8]
+	ldr	r3, [fp, #-24]
 	mov	r2, #2
 	str	r2, [r3, #16]
-	ldr	r3, [fp, #-8]
+	ldr	r3, [fp, #-24]
 	mov	r2, #2
 	str	r2, [r3, #52]
-	ldr	r3, [fp, #-24]
-	mov	r2, #25088
+	ldr	r3, [fp, #-20]
+	ldr	r3, [r3, #24]
+	str	r3, [fp, #-28]
+	ldr	r3, [fp, #-28]
+	orr	r2, r3, #512
+	ldr	r3, [fp, #-20]
 	str	r2, [r3, #16]
-	ldr	r3, [fp, #-8]
-	mov	r2, #144
-	str	r2, [r3, #4]
-	ldr	r3, [fp, #-32]
-	mov	r2, #2
-	str	r2, [r3, #0]
-	ldr	r2, [fp, #-32]
-	mov	r3, #327680
-	add	r3, r3, #64
-	str	r3, [r2, #4]
-	ldr	r3, [fp, #-32]
-	mov	r2, #1
-	str	r2, [r3, #0]
-	ldr	r3, [fp, #-28]
-	mov	r2, #2
-	str	r2, [r3, #0]
-	ldr	r2, [fp, #-28]
-	mov	r3, #327680
-	add	r3, r3, #64
-	str	r3, [r2, #4]
-	ldr	r3, [fp, #-28]
-	mov	r2, #1
-	str	r2, [r3, #0]
 	sub	sp, fp, #4
 	ldmfd	sp!, {fp, pc}
 .L73:
@@ -932,7 +862,55 @@ Timer3_init:
 	.word	CPU_CLOCK
 	.word	VORTEILER_INT
 	.word	FREQUENZ
-	.size	Timer3_init, .-Timer3_init
+	.size	timerPumpInit, .-timerPumpInit
+	.align	2
+	.global	timerMeasureInit
+	.type	timerMeasureInit, %function
+timerMeasureInit:
+	@ args = 0, pretend = 0, frame = 12
+	@ frame_needed = 1, uses_anonymous_args = 0
+	@ link register save eliminated.
+	str	fp, [sp, #-4]!
+	add	fp, sp, #0
+	sub	sp, sp, #12
+	mov	r3, #-1342177280
+	mov	r3, r3, asr #14
+	str	r3, [fp, #-12]
+	mvn	r3, #179200
+	sub	r3, r3, #956
+	sub	r3, r3, #3
+	str	r3, [fp, #-8]
+	mvn	r3, #179200
+	sub	r3, r3, #892
+	sub	r3, r3, #3
+	str	r3, [fp, #-4]
+	ldr	r3, [fp, #-12]
+	mov	r2, #144
+	str	r2, [r3, #4]
+	ldr	r3, [fp, #-8]
+	mov	r2, #2
+	str	r2, [r3, #0]
+	ldr	r2, [fp, #-8]
+	mov	r3, #327680
+	add	r3, r3, #64
+	str	r3, [r2, #4]
+	ldr	r3, [fp, #-8]
+	mov	r2, #1
+	str	r2, [r3, #0]
+	ldr	r3, [fp, #-4]
+	mov	r2, #2
+	str	r2, [r3, #0]
+	ldr	r2, [fp, #-4]
+	mov	r3, #327680
+	add	r3, r3, #64
+	str	r3, [r2, #4]
+	ldr	r3, [fp, #-4]
+	mov	r2, #1
+	str	r2, [r3, #0]
+	add	sp, fp, #0
+	ldmfd	sp!, {fp}
+	bx	lr
+	.size	timerMeasureInit, .-timerMeasureInit
 	.global	__floatsidf
 	.global	__divdf3
 	.global	__truncdfsf2
@@ -942,9 +920,9 @@ Timer3_init:
 	.global	__mulsf3
 	.global	__fixunssfsi
 	.align	2
-	.global	MessungderMasse
-	.type	MessungderMasse, %function
-MessungderMasse:
+	.global	massMeasure
+	.type	massMeasure, %function
+massMeasure:
 	@ args = 0, pretend = 0, frame = 56
 	@ frame_needed = 1, uses_anonymous_args = 0
 	stmfd	sp!, {r4, fp, lr}
@@ -975,12 +953,12 @@ MessungderMasse:
 	ldr	r3, [fp, #-28]
 	mov	r2, #4
 	str	r2, [r3, #0]
-.L75:
+.L77:
 	ldr	r3, [fp, #-28]
 	ldr	r3, [r3, #32]
 	and	r3, r3, #64
 	cmp	r3, #0
-	beq	.L75
+	beq	.L77
 	ldr	r3, [fp, #-28]
 	ldr	r3, [r3, #20]
 	str	r3, [fp, #-32]
@@ -990,12 +968,12 @@ MessungderMasse:
 	ldr	r3, [fp, #-24]
 	mov	r2, #4
 	str	r2, [r3, #0]
-.L76:
+.L78:
 	ldr	r3, [fp, #-24]
 	ldr	r3, [r3, #32]
 	and	r3, r3, #64
 	cmp	r3, #0
-	beq	.L76
+	beq	.L78
 	ldr	r3, [fp, #-24]
 	ldr	r3, [r3, #20]
 	str	r3, [fp, #-40]
@@ -1005,14 +983,14 @@ MessungderMasse:
 	ldr	r3, [fp, #-36]
 	eor	r2, r3, r3, asr #31
 	sub	r2, r2, r3, asr #31
-	ldr	r1, [fp, #-32]
-	eor	r3, r1, r1, asr #31
-	sub	r3, r3, r1, asr #31
+	ldr	r3, [fp, #-32]
+	cmp	r3, #0
+	rsblt	r3, r3, #0
 	rsb	r3, r3, r2
 	str	r3, [fp, #-48]
-	ldr	r2, [fp, #-48]
-	eor	r3, r2, r2, asr #31
-	sub	r3, r3, r2, asr #31
+	ldr	r3, [fp, #-48]
+	cmp	r3, #0
+	rsblt	r3, r3, #0
 	mov	r0, r3
 	bl	__floatsidf
 	mov	r3, r0
@@ -1033,14 +1011,14 @@ MessungderMasse:
 	ldr	r3, [fp, #-44]
 	eor	r2, r3, r3, asr #31
 	sub	r2, r2, r3, asr #31
-	ldr	r1, [fp, #-40]
-	eor	r3, r1, r1, asr #31
-	sub	r3, r3, r1, asr #31
+	ldr	r3, [fp, #-40]
+	cmp	r3, #0
+	rsblt	r3, r3, #0
 	rsb	r3, r3, r2
 	str	r3, [fp, #-56]
-	ldr	r2, [fp, #-56]
-	eor	r3, r2, r2, asr #31
-	sub	r3, r3, r2, asr #31
+	ldr	r3, [fp, #-56]
+	cmp	r3, #0
+	rsblt	r3, r3, #0
 	mov	r0, r3
 	bl	__floatsidf
 	mov	r3, r0
@@ -1061,7 +1039,7 @@ MessungderMasse:
 	ldr	r3, [fp, #-20]
 	mov	r2, #16384
 	str	r2, [r3, #288]
-	ldr	r3, .L78	@ float
+	ldr	r3, .L80	@ float
 	str	r3, [fp, #-12]	@ float
 	ldr	r2, [fp, #-52]	@ float
 	ldr	r3, [fp, #-60]	@ float
@@ -1071,11 +1049,11 @@ MessungderMasse:
 	mov	r3, r0
 	str	r3, [fp, #-12]	@ float
 	ldr	r0, [fp, #-12]	@ float
-	ldr	r1, .L78+4	@ float
+	ldr	r1, .L80+4	@ float
 	bl	__subsf3
 	mov	r3, r0
 	str	r3, [fp, #-12]	@ float
-	ldr	r3, .L78+8
+	ldr	r3, .L80+8
 	ldr	r3, [r3, #0]
 	mov	r0, r3
 	bl	__floatunsisf
@@ -1085,7 +1063,7 @@ MessungderMasse:
 	bl	__mulsf3
 	mov	r3, r0
 	str	r3, [fp, #-12]	@ float
-	ldr	r3, .L78+12
+	ldr	r3, .L80+12
 	ldr	r3, [r3, #0]
 	mov	r0, r3
 	bl	__floatunsisf
@@ -1102,35 +1080,24 @@ MessungderMasse:
 	mov	r0, r3
 	sub	sp, fp, #8
 	ldmfd	sp!, {r4, fp, pc}
-.L79:
+.L81:
 	.align	2
-.L78:
+.L80:
 	.word	0
 	.word	1065353216
 	.word	C1
 	.word	C2
-	.size	MessungderMasse, .-MessungderMasse
+	.size	massMeasure, .-massMeasure
 	.align	2
 	.global	PIO_Init
 	.type	PIO_Init, %function
 PIO_Init:
-	@ args = 0, pretend = 0, frame = 24
+	@ args = 0, pretend = 0, frame = 12
 	@ frame_needed = 1, uses_anonymous_args = 0
 	@ link register save eliminated.
 	str	fp, [sp, #-4]!
 	add	fp, sp, #0
-	sub	sp, sp, #24
-	mov	r3, #-1342177280
-	mov	r3, r3, asr #14
-	str	r3, [fp, #-24]
-	mvn	r3, #179200
-	sub	r3, r3, #956
-	sub	r3, r3, #3
-	str	r3, [fp, #-20]
-	mvn	r3, #179200
-	sub	r3, r3, #892
-	sub	r3, r3, #3
-	str	r3, [fp, #-16]
+	sub	sp, sp, #12
 	mov	r3, #-2147483648
 	mov	r3, r3, asr #19
 	str	r3, [fp, #-12]
@@ -1150,9 +1117,6 @@ PIO_Init:
 	ldr	r3, [fp, #-12]
 	mov	r2, #16384
 	str	r2, [r3, #296]
-	ldr	r2, .L82
-	ldr	r3, [fp, #-12]
-	str	r2, [r3, #184]
 	ldr	r3, [fp, #-12]
 	mov	r2, #16384
 	str	r2, [r3, #288]
@@ -1171,79 +1135,5 @@ PIO_Init:
 	add	sp, fp, #0
 	ldmfd	sp!, {fp}
 	bx	lr
-.L83:
-	.align	2
-.L82:
-	.word	taste_irq_handler
 	.size	PIO_Init, .-PIO_Init
-	.align	2
-	.global	taste_irq_handler
-	.type	taste_irq_handler, %function
-taste_irq_handler:
-	@ Interrupt Service Routine.
-	@ args = 0, pretend = 0, frame = 12
-	@ frame_needed = 1, uses_anonymous_args = 0
-	@ link register save eliminated.
-	stmfd	sp!, {r2, r3, fp}
-	add	fp, sp, #8
-	sub	sp, sp, #12
-	mov	r3, #-2147483648
-	mov	r3, r3, asr #15
-	str	r3, [fp, #-20]
-	mov	r3, #-1342177280
-	mov	r3, r3, asr #14
-	str	r3, [fp, #-16]
-	mov	r3, #-2147483648
-	mov	r3, r3, asr #19
-	str	r3, [fp, #-12]
-	ldr	r3, [fp, #-20]
-	ldr	r3, [r3, #60]
-	mvn	r3, r3
-	and	r3, r3, #16
-	cmp	r3, #0
-	beq	.L85
-	ldr	r3, .L89
-	ldr	r3, [r3, #0]
-	cmp	r3, #0
-	bne	.L85
-	ldr	r3, [fp, #-16]
-	mov	r2, #2
-	str	r2, [r3, #4]
-.L85:
-	ldr	r3, [fp, #-20]
-	ldr	r3, [r3, #60]
-	mvn	r3, r3
-	and	r3, r3, #8
-	cmp	r3, #0
-	beq	.L86
-	ldr	r3, .L89+4
-	ldr	r3, [r3, #0]
-	mov	r2, r3
-	ldr	r3, .L89+8
-	ldr	r3, [r3, #0]
-	cmp	r2, r3
-	bls	.L87
-	ldr	r3, .L89
-	mov	r2, #0
-	str	r2, [r3, #0]
-	b	.L86
-.L87:
-	ldr	r3, .L89
-	mov	r2, #1
-	str	r2, [r3, #0]
-.L86:
-	ldr	r3, [fp, #-20]
-	ldr	r2, [r3, #76]
-	ldr	r3, [fp, #-12]
-	str	r2, [r3, #304]
-	sub	sp, fp, #8
-	ldmfd	sp!, {r2, r3, fp}
-	subs	pc, lr, #4
-.L90:
-	.align	2
-.L89:
-	.word	warteAufBecher
-	.word	Masse
-	.word	becher
-	.size	taste_irq_handler, .-taste_irq_handler
-	.ident	"GCC: (crosstool-NG-1.11.1-v4t) 4.4.5"
+	.ident	"GCC: (GNU) 4.4.1"
