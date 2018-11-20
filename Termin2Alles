@@ -1,0 +1,81 @@
+
+#include "../h/pmc.h"
+#include "../h/pio.h"
+#include "../h/aic.h"
+
+#define clock 250000
+
+void taste_irq_handler (void) __attribute__ ((interrupt));
+void init();
+
+
+
+StructPMC* pmcbase = PMC_BASE;
+StructPIO* piobaseB = PIOB_BASE;
+StructAIC* aicbase = AIC_BASE;
+
+
+  int ctr =0; 
+  int flag = 0; // 0 = up , 1 = down
+
+
+void taste_irq_handler (void)
+{
+ if(!(piobaseB->PIO_PDSR & KEY1)) {
+     piobaseB->PIO_SODR = LED1;
+  }
+  
+  if(!(piobaseB->PIO_PDSR & KEY2)){
+  piobaseB->PIO_CODR = LED1;
+  }
+  
+  aicbase->AIC_EOICR = piobaseB->PIO_ISR;
+}
+
+
+
+void init() {
+  piobaseB->PIO_PER = LED1|KEY1|KEY2;
+  piobaseB->PIO_OER = LED1 | LED2;
+  piobaseB->PIO_ODR = KEY1|KEY2;
+  pmcbase->PMC_PCER = 1<<14;
+  
+  //Set interrupt 
+  aicbase->AIC_IDCR = 1 << 14; // Interrupt PIOB ausschalten
+  aicbase->AIC_ICCR = 1 << 14; // Interrupt PIOB löschen
+  aicbase->AIC_SVR[PIOB_ID] = (unsigned int) taste_irq_handler; // source vector register. ISR Adresse
+  aicbase->AIC_SMR[PIOB_ID] = 0x7; // Priorität. source mode register.
+  aicbase->AIC_IECR = 1 << 14; // Interrupt PIOB einschalten
+  
+  piobaseB->PIO_IER = KEY1 | KEY2; // Interrupt innerhalb von PIOB erlauben
+   
+  }
+
+int main(void)
+{
+	init();
+	
+
+while (1){
+
+
+  //LED MIT TAKT 
+  if (ctr < clock && flag == 0 ){
+  	ctr++;
+  } 
+  else if (!(ctr < clock) && flag == 0) {
+  	flag = 1;
+   	piobaseB->PIO_CODR = LED2;
+  	}
+	
+  if(ctr > 0 && flag == 1){
+ 	ctr--;
+ }
+  else if(!(ctr > 0) && flag == 1){
+  	flag = 0; 
+ 	piobaseB->PIO_SODR = LED2;
+ }
+ 
+ }
+	return 0;
+}
